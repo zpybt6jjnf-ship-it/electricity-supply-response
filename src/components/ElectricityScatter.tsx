@@ -63,13 +63,15 @@ export function ElectricityScatter({ data }: Props) {
     [showTooltip],
   );
 
-  // Shaded "broken supply response" region — bottom-right quadrant
+  // Shaded "broken supply response" region — bottom-right quadrant.
+  // Capacity view: PJM, NYISO, ISO-NE (CAISO excluded — high output from state mandates).
+  // Queue view: PJM, CAISO, NYISO, ISO-NE (all have ≤12% completion).
   const shadedX0 = metric === "capacity"
-    ? xScale(34)
-    : xScale(34);
+    ? xScale(32)
+    : xScale(32);
   const shadedY0 = metric === "capacity"
-    ? yScale(60)
-    : yScale(18);
+    ? yScale(50)
+    : yScale(16);
 
   return (
     <div style={{ position: "relative" }}>
