@@ -182,14 +182,17 @@ def _build_output(
 
     # All-in prices: energy + capacity market payments ($/MWh equivalent).
     # ERCOT has no capacity market; others add RPM/FCA/ICAP/RA/PRA.
+    # Note: ISO-NE's published $87/MWh includes RECs, RGGI, ancillary, and
+    # transmission — the comparable energy + FCA capacity figure is ~$51.
+    # PJM uses 2024/25 BRA at $28.92/MW-day ≈ $2/MWh capacity.
     _ALL_IN_PRICES: dict[str, float] = {
         "ERCOT": 27.33,  # energy-only, no capacity market
         "SPP": 29.00,    # minimal capacity payments
         "MISO": 33.00,   # PRA ~$2/MWh equivalent
         "CAISO": 43.00,  # RA ~$5/MWh equivalent
-        "PJM": 42.00,    # RPM BRA ~$8/MWh equivalent
+        "PJM": 36.00,    # RPM BRA 2024/25 at $28.92/MW-day ≈ $2/MWh
         "NYISO": 50.00,  # ICAP ~$8/MWh equivalent
-        "ISO-NE": 87.00, # FCA ~$45/MWh equivalent
+        "ISO-NE": 51.00, # FCA ~$10/MWh capacity (energy + capacity only)
     }
 
     isos = []

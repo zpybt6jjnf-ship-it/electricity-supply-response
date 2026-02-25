@@ -98,13 +98,24 @@ export function QueueCompletionBar({ data, marginLeft, width }: Props) {
                   fontSize={11}
                   fill="#555"
                 >
-                  {d.queue_completion_pct}%
+                  {d.queue_completion_pct}%{d.id === "ERCOT" ? "*" : ""}
                 </text>
               </g>
             );
           })}
         </g>
       </svg>
+      <p
+        style={{
+          fontFamily: FONT.body,
+          fontSize: 10,
+          color: "#999",
+          margin: "4px 0 0",
+          fontStyle: "italic",
+        }}
+      >
+        * ERCOT uses 2018–2020 cohort (Brattle/AEU); others use 2000–2019 (LBNL)
+      </p>
     </div>
   );
 }

@@ -1,11 +1,10 @@
 export type ColorGroup = "functional" | "intermediate" | "broken";
 
-export type XAxisMetric = "capacity" | "queue" | "projects";
+export type XAxisMetric = "capacity" | "queue";
 
 export type PriceMetric = "energy" | "all_in";
 
-/** @deprecated Use XAxisMetric instead */
-export type YAxisMetric = XAxisMetric;
+export type CapacityWeighting = "nameplate" | "elcc";
 
 export interface ISODataPoint {
   id: string;
@@ -14,9 +13,12 @@ export interface ISODataPoint {
   wholesale_price_mwh: number;
   all_in_price_mwh: number;
   capacity_additions_mw: number;
+  capacity_additions_elcc_mw?: number;
   project_count: number;
   peak_demand_gw: number;
   queue_completion_pct: number;
+  queue_cohort?: string;
+  price_2023_mwh?: number;
   color_group: ColorGroup;
   qualitative_note: string;
   sources: {
@@ -41,6 +43,11 @@ export interface ISOScatterDataset {
 /** Derived metric: MW of new capacity per GW of system peak */
 export function capacityPerGwPeak(d: ISODataPoint): number {
   return d.capacity_additions_mw / d.peak_demand_gw;
+}
+
+/** Derived metric: ELCC-weighted capacity per GW of system peak */
+export function capacityPerGwPeakElcc(d: ISODataPoint): number {
+  return (d.capacity_additions_elcc_mw ?? d.capacity_additions_mw) / d.peak_demand_gw;
 }
 
 /** Derived metric: distinct generators per GW of system peak */

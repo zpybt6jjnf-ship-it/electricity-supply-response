@@ -1,25 +1,25 @@
 import { scaleLinear, scaleSqrt } from "@visx/scale";
-import type { ISODataPoint, XAxisMetric, PriceMetric } from "./types";
-import { capacityPerGwPeak, projectsPerGwPeak } from "./types";
+import type { ISODataPoint, XAxisMetric, PriceMetric, CapacityWeighting } from "./types";
+import { capacityPerGwPeak, capacityPerGwPeakElcc } from "./types";
 
-export function getXValue(d: ISODataPoint, metric: XAxisMetric): number {
+export function getXValue(d: ISODataPoint, metric: XAxisMetric, weighting?: CapacityWeighting): number {
   if (metric === "queue") return d.queue_completion_pct;
-  if (metric === "projects") return projectsPerGwPeak(d);
-  return capacityPerGwPeak(d);
+  return weighting === "elcc" ? capacityPerGwPeakElcc(d) : capacityPerGwPeak(d);
 }
 
-export function getXLabel(metric: XAxisMetric): string {
+export function getXLabel(metric: XAxisMetric, weighting?: CapacityWeighting): string {
   if (metric === "queue") return "Queue Completion Rate (%)";
-  if (metric === "projects") return "Projects Reaching COD (per GW Peak)";
-  return "New Capacity (MW per GW of System Peak)";
+  return weighting === "elcc"
+    ? "New Capacity (ELCC-Weighted MW per GW of System Peak)"
+    : "New Capacity (MW per GW of System Peak)";
 }
 
-export function getXSubtitle(metric: XAxisMetric): string {
+export function getXSubtitle(metric: XAxisMetric, weighting?: CapacityWeighting): string {
   if (metric === "queue")
     return "Share of Interconnection Requests Reaching Commercial Operation";
-  if (metric === "projects")
-    return "Distinct Generators Reaching Commercial Operation per GW of System Peak";
-  return "Annual New Generation Reaching Commercial Operation (MW per GW of System Peak)";
+  return weighting === "elcc"
+    ? "ELCC-Estimated Effective Capacity Reaching Commercial Operation (MW per GW of System Peak)"
+    : "Annual New Generation Reaching Commercial Operation (MW per GW of System Peak)";
 }
 
 export function getYValue(d: ISODataPoint, priceMetric: PriceMetric): number {
@@ -39,11 +39,12 @@ export function createScales(
   width: number,
   height: number,
   margin: { top: number; right: number; bottom: number; left: number },
+  weighting?: CapacityWeighting,
 ) {
   const xMax = width - margin.left - margin.right;
   const yMax = height - margin.top - margin.bottom;
 
-  const xValues = data.map((d) => getXValue(d, metric));
+  const xValues = data.map((d) => getXValue(d, metric, weighting));
   const priceValues = data.map((d) => getYValue(d, priceMetric));
   const peakValues = data.map((d) => d.peak_demand_gw);
 

@@ -3,7 +3,7 @@ import { Group } from "@visx/group";
 import { AxisBottom, AxisLeft } from "@visx/axis";
 import { GridRows, GridColumns } from "@visx/grid";
 import { useTooltip } from "@visx/tooltip";
-import type { ISODataPoint, XAxisMetric, PriceMetric } from "../lib/types";
+import type { ISODataPoint, XAxisMetric, PriceMetric, CapacityWeighting } from "../lib/types";
 import { createScales, getXValue, getXLabel, getXSubtitle, getYValue, getYLabel } from "../lib/scales";
 import { GROUP_FILLS, GROUP_STROKES, SHADED_REGION } from "../lib/colors";
 import { FONT, AXIS_STYLE, GRID_STYLE } from "../lib/theme";
@@ -11,6 +11,7 @@ import { ScatterTooltip } from "./ScatterTooltip";
 import { ChartControls } from "./ChartControls";
 import { ChartToolbar } from "./ChartToolbar";
 import { QueueCompletionBar } from "./QueueCompletionBar";
+import { MethodologyNotes } from "./MethodologyNotes";
 
 const WIDTH = 820;
 const HEIGHT = 580;
@@ -19,26 +20,33 @@ const MARGIN = { top: 60, right: 50, bottom: 88, left: 82 };
 /**
  * Hand-tuned label offsets per ISO to avoid overlaps.
  * [dx, dy] relative to bubble center, in px.
- * Keyed by x-axis metric. Energy vs all-in price may shift y positions
- * but the offsets are robust enough for both price modes.
+ * Keyed by view key: "queue", "capacity" (nameplate), "capacity_elcc".
  */
-const LABEL_OFFSETS: Record<string, Record<XAxisMetric, [number, number]>> = {
-  ERCOT:    { capacity: [15, -30],  queue: [15, -22],  projects: [15, -30] },
-  SPP:      { capacity: [15, -18],  queue: [15, -18],  projects: [15, -18] },
-  MISO:     { capacity: [15, -10],  queue: [15, 8],    projects: [15, 8] },
-  CAISO:    { capacity: [-55, -20], queue: [-55, -15], projects: [-55, -20] },
-  PJM:      { capacity: [58, -15],  queue: [30, -55],  projects: [55, -15] },
-  NYISO:    { capacity: [15, -22],  queue: [-52, -10], projects: [15, -22] },
-  "ISO-NE": { capacity: [-15, -18], queue: [-52, 8],   projects: [-15, -18] },
+type ViewKey = "queue" | "capacity" | "capacity_elcc";
+
+const LABEL_OFFSETS: Record<string, Record<ViewKey, [number, number]>> = {
+  ERCOT:    { capacity: [15, -30],  capacity_elcc: [15, -30],  queue: [15, -22] },
+  SPP:      { capacity: [15, -18],  capacity_elcc: [15, -18],  queue: [15, -18] },
+  MISO:     { capacity: [15, -10],  capacity_elcc: [15, -10],  queue: [15, 8] },
+  CAISO:    { capacity: [-55, -20], capacity_elcc: [-55, -20], queue: [-55, -15] },
+  PJM:      { capacity: [58, -15],  capacity_elcc: [15, -22],  queue: [30, -55] },
+  NYISO:    { capacity: [15, -22],  capacity_elcc: [15, -22],  queue: [-52, -10] },
+  "ISO-NE": { capacity: [-15, -18], capacity_elcc: [-15, -18], queue: [-52, 8] },
 };
+
+function getViewKey(metric: XAxisMetric, weighting: CapacityWeighting): ViewKey {
+  if (metric === "queue") return "queue";
+  return weighting === "elcc" ? "capacity_elcc" : "capacity";
+}
 
 interface Props {
   data: ISODataPoint[];
 }
 
 export function ElectricityScatter({ data }: Props) {
-  const [metric, setMetric] = useState<XAxisMetric>("capacity");
+  const [metric, setMetric] = useState<XAxisMetric>("queue");
   const [priceMetric, setPriceMetric] = useState<PriceMetric>("energy");
+  const [weighting, setWeighting] = useState<CapacityWeighting>("nameplate");
   const svgRef = useRef<SVGSVGElement>(null);
 
   const {
@@ -57,6 +65,7 @@ export function ElectricityScatter({ data }: Props) {
     WIDTH,
     HEIGHT,
     MARGIN,
+    weighting,
   );
 
   const handleMouseEnter = useCallback(
@@ -72,15 +81,15 @@ export function ElectricityScatter({ data }: Props) {
 
   // Shaded "broken supply response" region — upper-left (high price, low building).
   const shadedXThreshold =
-    metric === "capacity" ? 50
-    : metric === "queue" ? 16
-    : 0.7; // projects per GW peak
-  const shadedYThreshold = priceMetric === "all_in" ? 40 : 32;
+    metric === "queue" ? 16
+    : weighting === "elcc" ? 25
+    : 50;
+  const shadedYThreshold = priceMetric === "all_in" ? 45 : 35;
   const shadedX1 = xScale(shadedXThreshold);
   const shadedY1 = yScale(shadedYThreshold);
 
   return (
-    <div style={{ position: "relative" }}>
+    <div style={{ position: "relative", minWidth: WIDTH }}>
       {/* Title block */}
       <div style={{ marginBottom: 2, paddingLeft: MARGIN.left }}>
         <h2
@@ -103,7 +112,7 @@ export function ElectricityScatter({ data }: Props) {
             margin: "2px 0 0",
           }}
         >
-          {getXSubtitle(metric)}, 2024
+          {getXSubtitle(metric, weighting)}, 2024
         </p>
       </div>
 
@@ -112,8 +121,10 @@ export function ElectricityScatter({ data }: Props) {
         <ChartControls
           xMetric={metric}
           yMetric={priceMetric}
+          weighting={weighting}
           onXChange={setMetric}
           onYChange={setPriceMetric}
+          onWeightingChange={setWeighting}
         />
       </div>
 
@@ -161,7 +172,7 @@ export function ElectricityScatter({ data }: Props) {
 
           {/* Bubbles */}
           {data.map((d) => {
-            const cx = xScale(getXValue(d, metric)) ?? 0;
+            const cx = xScale(getXValue(d, metric, weighting)) ?? 0;
             const cy = yScale(getYValue(d, priceMetric)) ?? 0;
             const r = rScale(d.peak_demand_gw);
             return (
@@ -184,9 +195,9 @@ export function ElectricityScatter({ data }: Props) {
 
           {/* Direct labels */}
           {data.map((d) => {
-            const cx = xScale(getXValue(d, metric)) ?? 0;
+            const cx = xScale(getXValue(d, metric, weighting)) ?? 0;
             const cy = yScale(getYValue(d, priceMetric)) ?? 0;
-            const [dx, dy] = LABEL_OFFSETS[d.id]?.[metric] ?? [15, -15];
+            const [dx, dy] = LABEL_OFFSETS[d.id]?.[getViewKey(metric, weighting)] ?? [15, -15];
             return (
               <text
                 key={`label-${d.id}`}
@@ -203,11 +214,73 @@ export function ElectricityScatter({ data }: Props) {
             );
           })}
 
+          {/* ERCOT 2023 price annotation — dashed line from current to $55 */}
+          {(() => {
+            const ercot = data.find((d) => d.id === "ERCOT");
+            if (!ercot || !ercot.price_2023_mwh) return null;
+            const cx = xScale(getXValue(ercot, metric, weighting)) ?? 0;
+            const cyNow = yScale(getYValue(ercot, priceMetric)) ?? 0;
+            const rawCy2023 = yScale(ercot.price_2023_mwh) ?? 0;
+            // Clamp to top of chart if $55 is above y-axis range
+            const cy2023 = Math.max(rawCy2023, 0);
+            // Place label at midpoint of the line, to the left
+            const labelY = (cyNow + cy2023) / 2;
+            return (
+              <g style={{ pointerEvents: "none" }}>
+                <line
+                  x1={cx}
+                  y1={cyNow}
+                  x2={cx}
+                  y2={cy2023}
+                  stroke={GROUP_STROKES.functional}
+                  strokeWidth={1.2}
+                  strokeDasharray="4 3"
+                  opacity={0.5}
+                />
+                <circle cx={cx} cy={cy2023} r={3} fill={GROUP_STROKES.functional} opacity={0.5} />
+                <text
+                  x={cx - 8}
+                  y={labelY}
+                  textAnchor="end"
+                  fontFamily={FONT.body}
+                  fontSize={10}
+                  fill={GROUP_STROKES.functional}
+                  opacity={0.7}
+                >
+                  2023: ${ercot.price_2023_mwh}/MWh
+                </text>
+              </g>
+            );
+          })()}
+
+          {/* CAISO "Mandate-driven" persistent annotation */}
+          {(() => {
+            const caiso = data.find((d) => d.id === "CAISO");
+            if (!caiso) return null;
+            const cx = xScale(getXValue(caiso, metric, weighting)) ?? 0;
+            const cy = yScale(getYValue(caiso, priceMetric)) ?? 0;
+            return (
+              <text
+                x={cx}
+                y={cy + rScale(caiso.peak_demand_gw) + 14}
+                textAnchor="middle"
+                fontFamily={FONT.title}
+                fontSize={9.5}
+                fontStyle="italic"
+                fill="#8073ac"
+                opacity={0.65}
+                style={{ pointerEvents: "none" }}
+              >
+                Mandate-driven
+              </text>
+            );
+          })()}
+
           {/* Axes */}
           <AxisBottom
             top={yMax}
             scale={xScale}
-            label={getXLabel(metric)}
+            label={getXLabel(metric, weighting)}
             stroke={AXIS_STYLE.strokeColor}
             tickStroke={AXIS_STYLE.tickStroke}
             tickLabelProps={() => AXIS_STYLE.tickLabelProps}
@@ -219,6 +292,21 @@ export function ElectricityScatter({ data }: Props) {
               metric === "queue" ? `${v}%` : String(v)
             }
           />
+          {/* Queue cohort footnote below x-axis */}
+          {metric === "queue" && (
+            <text
+              x={xMax / 2}
+              y={yMax + 68}
+              textAnchor="middle"
+              fontFamily={FONT.body}
+              fontSize={9.5}
+              fontStyle="italic"
+              fill="#999"
+            >
+              * ERCOT: 2018–2020 cohort (Brattle/AEU); all others: 2000–2019 (LBNL Queued Up)
+            </text>
+          )}
+
           <AxisLeft
             scale={yScale}
             label={getYLabel(priceMetric)}
@@ -276,33 +364,12 @@ export function ElectricityScatter({ data }: Props) {
         </Group>
       </svg>
 
-      {/* CAISO annotation — only on capacity view, only on hover */}
-      {tooltipOpen && tooltipData?.id === "CAISO" && metric === "capacity" && (
-        <div
-          style={{
-            position: "absolute",
-            left: MARGIN.left + (xScale(getXValue(tooltipData, metric)) ?? 0) - 100,
-            top: MARGIN.top + (yScale(getYValue(tooltipData, priceMetric)) ?? 0) + 30,
-            width: 150,
-            fontFamily: FONT.title,
-            fontSize: 9,
-            fontStyle: "italic",
-            color: "#8073ac",
-            opacity: 0.7,
-            lineHeight: 1.3,
-            pointerEvents: "none",
-            textAlign: "center",
-          }}
-        >
-          State mandates drive procurement despite queue friction
-        </div>
-      )}
-
       {/* Tooltip */}
       {tooltipOpen && tooltipData && (
         <ScatterTooltip
           data={tooltipData}
           priceMetric={priceMetric}
+          weighting={weighting}
           top={tooltipTop ?? 0}
           left={tooltipLeft ?? 0}
         />
@@ -376,6 +443,11 @@ export function ElectricityScatter({ data }: Props) {
       {/* Queue Completion Bar Chart (Panel B) */}
       <div style={{ marginTop: 16, borderTop: "1px solid #e8e8e8", paddingTop: 16 }}>
         <QueueCompletionBar data={data} marginLeft={MARGIN.left} width={WIDTH} />
+      </div>
+
+      {/* Methodology & Data Notes (collapsible) */}
+      <div style={{ paddingLeft: MARGIN.left, paddingRight: MARGIN.right }}>
+        <MethodologyNotes />
       </div>
     </div>
   );

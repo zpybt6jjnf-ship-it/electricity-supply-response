@@ -1,22 +1,28 @@
-import type { XAxisMetric, PriceMetric } from "../lib/types";
+import type { XAxisMetric, PriceMetric, CapacityWeighting } from "../lib/types";
 import { FONT } from "../lib/theme";
 
 interface Props {
   xMetric: XAxisMetric;
   yMetric: PriceMetric;
+  weighting: CapacityWeighting;
   onXChange: (m: XAxisMetric) => void;
   onYChange: (m: PriceMetric) => void;
+  onWeightingChange: (w: CapacityWeighting) => void;
 }
 
 const xOptions: { value: XAxisMetric; label: string }[] = [
   { value: "capacity", label: "New Capacity (MW / GW peak)" },
   { value: "queue", label: "Queue Completion Rate (%)" },
-  { value: "projects", label: "Projects per GW Peak" },
 ];
 
 const yOptions: { value: PriceMetric; label: string }[] = [
   { value: "energy", label: "Energy-Only Price" },
   { value: "all_in", label: "All-In Price (Energy + Capacity)" },
+];
+
+const weightingOptions: { value: CapacityWeighting; label: string }[] = [
+  { value: "nameplate", label: "Nameplate MW" },
+  { value: "elcc", label: "ELCC-Estimated" },
 ];
 
 function ToggleButton<T extends string>({
@@ -52,7 +58,14 @@ function ToggleButton<T extends string>({
   );
 }
 
-export function ChartControls({ xMetric, yMetric, onXChange, onYChange }: Props) {
+export function ChartControls({
+  xMetric,
+  yMetric,
+  weighting,
+  onXChange,
+  onYChange,
+  onWeightingChange,
+}: Props) {
   return (
     <div
       style={{
@@ -64,7 +77,7 @@ export function ChartControls({ xMetric, yMetric, onXChange, onYChange }: Props)
       }}
     >
       <div style={{ display: "flex", gap: 4, alignItems: "center" }}>
-        <span style={{ color: "#888", marginRight: 4, lineHeight: "30px", minWidth: 48 }}>
+        <span style={{ color: "#888", marginRight: 4, lineHeight: "30px", minWidth: 80 }}>
           X-axis:
         </span>
         {xOptions.map((o) => (
@@ -78,7 +91,7 @@ export function ChartControls({ xMetric, yMetric, onXChange, onYChange }: Props)
         ))}
       </div>
       <div style={{ display: "flex", gap: 4, alignItems: "center" }}>
-        <span style={{ color: "#888", marginRight: 4, lineHeight: "30px", minWidth: 48 }}>
+        <span style={{ color: "#888", marginRight: 4, lineHeight: "30px", minWidth: 80 }}>
           Y-axis:
         </span>
         {yOptions.map((o) => (
@@ -91,6 +104,22 @@ export function ChartControls({ xMetric, yMetric, onXChange, onYChange }: Props)
           />
         ))}
       </div>
+      {xMetric === "capacity" && (
+        <div style={{ display: "flex", gap: 4, alignItems: "center" }}>
+          <span style={{ color: "#888", marginRight: 4, lineHeight: "30px", minWidth: 80 }}>
+            Capacity basis:
+          </span>
+          {weightingOptions.map((o) => (
+            <ToggleButton
+              key={o.value}
+              value={o.value}
+              label={o.label}
+              active={weighting === o.value}
+              onClick={onWeightingChange}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 }

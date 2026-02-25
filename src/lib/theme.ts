@@ -3,6 +3,7 @@
 export const FONT = {
   title: "Georgia, 'Times New Roman', serif",
   body: "-apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Arial, sans-serif",
+  brand: "'Space Mono', 'Courier New', monospace",
 };
 
 export const AXIS_STYLE = {

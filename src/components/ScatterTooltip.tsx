@@ -1,12 +1,13 @@
 import { defaultStyles, TooltipWithBounds } from "@visx/tooltip";
-import type { ISODataPoint, PriceMetric } from "../lib/types";
-import { capacityPerGwPeak, projectsPerGwPeak } from "../lib/types";
+import type { ISODataPoint, PriceMetric, CapacityWeighting } from "../lib/types";
+import { capacityPerGwPeak, capacityPerGwPeakElcc, projectsPerGwPeak } from "../lib/types";
 import { FONT } from "../lib/theme";
 import { GROUP_FILLS } from "../lib/colors";
 
 interface Props {
   data: ISODataPoint;
   priceMetric: PriceMetric;
+  weighting: CapacityWeighting;
   top: number;
   left: number;
 }
@@ -23,7 +24,9 @@ const tooltipStyles: React.CSSProperties = {
   borderRadius: 4,
 };
 
-export function ScatterTooltip({ data, priceMetric, top, left }: Props) {
+export function ScatterTooltip({ data, priceMetric, weighting, top, left }: Props) {
+  const showElcc = weighting === "elcc" && data.capacity_additions_elcc_mw != null;
+
   return (
     <TooltipWithBounds top={top} left={left} style={tooltipStyles}>
       <div
@@ -46,17 +49,34 @@ export function ScatterTooltip({ data, priceMetric, top, left }: Props) {
             value={`$${data.wholesale_price_mwh.toFixed(2)}/MWh`}
             highlight={priceMetric === "energy"}
           />
+          {data.price_2023_mwh != null && (
+            <Row
+              label="2023 price"
+              value={`$${data.price_2023_mwh.toFixed(2)}/MWh`}
+            />
+          )}
           <Row
             label="All-in price"
             value={`$${data.all_in_price_mwh.toFixed(2)}/MWh`}
             highlight={priceMetric === "all_in"}
           />
-          <Row label="New capacity" value={`${data.capacity_additions_mw.toLocaleString()} MW`} />
-          <Row label="Per GW peak" value={`${capacityPerGwPeak(data).toFixed(1)} MW/GW`} />
+          <Row
+            label="New capacity"
+            value={`${data.capacity_additions_mw.toLocaleString()} MW${showElcc ? ` (${data.capacity_additions_elcc_mw!.toLocaleString()} MW ELCC)` : ""}`}
+          />
+          <Row
+            label="Per GW peak"
+            value={showElcc
+              ? `${capacityPerGwPeakElcc(data).toFixed(1)} MW/GW (ELCC)`
+              : `${capacityPerGwPeak(data).toFixed(1)} MW/GW`}
+          />
           <Row label="Projects" value={`${data.project_count}`} />
           <Row label="Per GW peak" value={`${projectsPerGwPeak(data).toFixed(1)} projects/GW`} />
           <Row label="Peak demand" value={`${data.peak_demand_gw.toFixed(1)} GW`} />
-          <Row label="Queue completion" value={`${data.queue_completion_pct}%`} />
+          <Row
+            label="Queue completion"
+            value={`${data.queue_completion_pct}%${data.queue_cohort ? ` (${data.queue_cohort})` : ""}`}
+          />
         </tbody>
       </table>
       <div
