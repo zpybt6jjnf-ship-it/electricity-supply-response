@@ -5,7 +5,7 @@ import { GridRows, GridColumns } from "@visx/grid";
 import { useTooltip } from "@visx/tooltip";
 import type { ISODataPoint, XAxisMetric, PriceMetric, CapacityWeighting, GranularityLevel } from "../lib/types";
 import { createScales, getXValue, getXLabel, getXSubtitle, getYValue, getYLabel } from "../lib/scales";
-import { GROUP_FILLS, GROUP_STROKES, SHADED_REGION } from "../lib/colors";
+import { GROUP_FILLS, GROUP_STROKES } from "../lib/colors";
 import { FONT, AXIS_STYLE, GRID_STYLE } from "../lib/theme";
 import { ScatterTooltip } from "./ScatterTooltip";
 import { ChartControls } from "./ChartControls";
@@ -102,15 +102,6 @@ export function ElectricityScatter({ isoData, stateData }: Props) {
     [showTooltip],
   );
 
-  // Shaded "broken supply response" region — upper-left (high price, low building).
-  // Only shown in ISO view.
-  const shadedXThreshold =
-    metric === "queue" ? 16
-    : weighting === "elcc" ? 25
-    : 50;
-  const shadedYThreshold = priceMetric === "all_in" ? 45 : 35;
-  const shadedX1 = xScale(shadedXThreshold);
-  const shadedY1 = yScale(shadedYThreshold);
 
   // Compute ISO bands for state view using min/max retail price per ISO.
   const isoBands = useMemo(() => {
@@ -209,35 +200,6 @@ export function ElectricityScatter({ isoData, stateData }: Props) {
             stroke={GRID_STYLE.stroke}
             strokeDasharray={GRID_STYLE.strokeDasharray}
           />
-
-          {/* Shaded "broken supply response" region — ISO view only */}
-          {!isStateView && (
-            <>
-              <rect
-                x={0}
-                y={0}
-                width={shadedX1}
-                height={shadedY1}
-                fill={SHADED_REGION.fill}
-                stroke={SHADED_REGION.stroke}
-                strokeDasharray={SHADED_REGION.strokeDasharray}
-                strokeWidth={1.2}
-                rx={4}
-              />
-              <text
-                x={8}
-                y={18}
-                textAnchor="start"
-                fontFamily={FONT.title}
-                fontSize={12}
-                fontStyle="italic"
-                fill="#b2182b"
-                opacity={0.6}
-              >
-                Broken supply response
-              </text>
-            </>
-          )}
 
           {/* Horizontal ISO price bands — state view only */}
           {isStateView && isoBands.map(({ iso, yTop, yBottom, yCenter }) => (
