@@ -1,9 +1,9 @@
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useMemo } from "react";
 import { Group } from "@visx/group";
 import { AxisBottom, AxisLeft } from "@visx/axis";
 import { GridRows, GridColumns } from "@visx/grid";
 import { useTooltip } from "@visx/tooltip";
-import type { ISODataPoint, XAxisMetric, PriceMetric, CapacityWeighting } from "../lib/types";
+import type { ISODataPoint, XAxisMetric, PriceMetric, CapacityWeighting, GranularityLevel } from "../lib/types";
 import { createScales, getXValue, getXLabel, getXSubtitle, getYValue, getYLabel } from "../lib/scales";
 import { GROUP_FILLS, GROUP_STROKES, SHADED_REGION } from "../lib/colors";
 import { FONT, AXIS_STYLE, GRID_STYLE } from "../lib/theme";
@@ -39,15 +39,37 @@ function getViewKey(metric: XAxisMetric, weighting: CapacityWeighting): ViewKey 
   return weighting === "elcc" ? "capacity_elcc" : "capacity";
 }
 
+/** ISO color mapping for horizontal band labels */
+const ISO_BAND_COLORS: Record<string, string> = {
+  ERCOT: "#2166ac",
+  MISO: "#2166ac",
+  SPP: "#5e4fa2",
+  CAISO: "#5e4fa2",
+  PJM: "#5e4fa2",
+  NYISO: "#b2182b",
+  "ISO-NE": "#b2182b",
+};
+
 interface Props {
-  data: ISODataPoint[];
+  isoData: ISODataPoint[];
+  stateData: ISODataPoint[];
 }
 
-export function ElectricityScatter({ data }: Props) {
+export function ElectricityScatter({ isoData, stateData }: Props) {
+  const [granularity, setGranularity] = useState<GranularityLevel>("iso");
   const [metric, setMetric] = useState<XAxisMetric>("queue");
   const [priceMetric, setPriceMetric] = useState<PriceMetric>("energy");
   const [weighting, setWeighting] = useState<CapacityWeighting>("nameplate");
   const svgRef = useRef<SVGSVGElement>(null);
+
+  // Force capacity x-axis in state view (queue completion is ISO-level, not per-state)
+  const handleGranularityChange = useCallback((g: GranularityLevel) => {
+    setGranularity(g);
+    if (g === "state") setMetric("capacity");
+  }, []);
+
+  const data = granularity === "state" ? stateData : isoData;
+  const isStateView = granularity === "state";
 
   const {
     showTooltip,
@@ -66,6 +88,7 @@ export function ElectricityScatter({ data }: Props) {
     HEIGHT,
     MARGIN,
     weighting,
+    granularity,
   );
 
   const handleMouseEnter = useCallback(
@@ -80,6 +103,7 @@ export function ElectricityScatter({ data }: Props) {
   );
 
   // Shaded "broken supply response" region — upper-left (high price, low building).
+  // Only shown in ISO view.
   const shadedXThreshold =
     metric === "queue" ? 16
     : weighting === "elcc" ? 25
@@ -87,6 +111,40 @@ export function ElectricityScatter({ data }: Props) {
   const shadedYThreshold = priceMetric === "all_in" ? 45 : 35;
   const shadedX1 = xScale(shadedXThreshold);
   const shadedY1 = yScale(shadedYThreshold);
+
+  // Compute ISO bands for state view using min/max retail price per ISO.
+  const isoBands = useMemo(() => {
+    if (!isStateView) return [];
+
+    const isoGroups: Record<string, { prices: number[] }> = {};
+    for (const d of stateData) {
+      const iso = d.region;
+      if (!isoGroups[iso]) {
+        isoGroups[iso] = { prices: [] };
+      }
+      isoGroups[iso].prices.push(getYValue(d, priceMetric, granularity));
+    }
+
+    return Object.entries(isoGroups).map(([iso, { prices }]) => {
+      const minPrice = Math.min(...prices);
+      const maxPrice = Math.max(...prices);
+      const yTop = yScale(maxPrice);
+      const yBottom = yScale(minPrice);
+      // Add small padding for single-state ISOs
+      const pad = prices.length === 1 ? 12 : 4;
+      return {
+        iso,
+        yTop: yTop - pad,
+        yBottom: yBottom + pad,
+        yCenter: (yTop + yBottom) / 2,
+      };
+    });
+  }, [isStateView, stateData, priceMetric, granularity, yScale]);
+
+  // Chart title adapts to granularity.
+  const title = isStateView
+    ? "New Capacity vs. Retail Electricity Price by State"
+    : "New Capacity vs. Wholesale Price Across RTOs/ISOs";
 
   return (
     <div style={{ position: "relative", minWidth: WIDTH }}>
@@ -102,7 +160,7 @@ export function ElectricityScatter({ data }: Props) {
             lineHeight: 1.3,
           }}
         >
-          New Capacity vs. Wholesale Price Across RTOs/ISOs
+          {title}
         </h2>
         <p
           style={{
@@ -113,15 +171,22 @@ export function ElectricityScatter({ data }: Props) {
           }}
         >
           {getXSubtitle(metric, weighting)}, 2024
+          {isStateView && (
+            <span style={{ color: "#999", marginLeft: 8, fontSize: 11 }}>
+              State retail prices from EIA (2024 avg, all sectors)
+            </span>
+          )}
         </p>
       </div>
 
       {/* Controls */}
       <div style={{ marginBottom: 4, paddingLeft: MARGIN.left }}>
         <ChartControls
+          granularity={granularity}
           xMetric={metric}
           yMetric={priceMetric}
           weighting={weighting}
+          onGranularityChange={handleGranularityChange}
           onXChange={setMetric}
           onYChange={setPriceMetric}
           onWeightingChange={setWeighting}
@@ -145,35 +210,69 @@ export function ElectricityScatter({ data }: Props) {
             strokeDasharray={GRID_STYLE.strokeDasharray}
           />
 
-          {/* Shaded "broken supply response" region — upper-left */}
-          <rect
-            x={0}
-            y={0}
-            width={shadedX1}
-            height={shadedY1}
-            fill={SHADED_REGION.fill}
-            stroke={SHADED_REGION.stroke}
-            strokeDasharray={SHADED_REGION.strokeDasharray}
-            strokeWidth={1.2}
-            rx={4}
-          />
-          <text
-            x={8}
-            y={18}
-            textAnchor="start"
-            fontFamily={FONT.title}
-            fontSize={12}
-            fontStyle="italic"
-            fill="#b2182b"
-            opacity={0.6}
-          >
-            Broken supply response
-          </text>
+          {/* Shaded "broken supply response" region — ISO view only */}
+          {!isStateView && (
+            <>
+              <rect
+                x={0}
+                y={0}
+                width={shadedX1}
+                height={shadedY1}
+                fill={SHADED_REGION.fill}
+                stroke={SHADED_REGION.stroke}
+                strokeDasharray={SHADED_REGION.strokeDasharray}
+                strokeWidth={1.2}
+                rx={4}
+              />
+              <text
+                x={8}
+                y={18}
+                textAnchor="start"
+                fontFamily={FONT.title}
+                fontSize={12}
+                fontStyle="italic"
+                fill="#b2182b"
+                opacity={0.6}
+              >
+                Broken supply response
+              </text>
+            </>
+          )}
+
+          {/* Horizontal ISO price bands — state view only */}
+          {isStateView && isoBands.map(({ iso, yTop, yBottom, yCenter }) => (
+            <g key={`band-${iso}`}>
+              {/* Band spanning retail price range */}
+              <rect
+                x={0}
+                y={yTop}
+                width={xMax}
+                height={Math.max(yBottom - yTop, 4)}
+                fill={ISO_BAND_COLORS[iso] ?? "#999"}
+                opacity={0.04}
+                rx={2}
+              />
+              {/* ISO label on right edge */}
+              <text
+                x={xMax + 6}
+                y={yCenter}
+                textAnchor="start"
+                dominantBaseline="central"
+                fontFamily={FONT.body}
+                fontSize={10}
+                fontWeight={600}
+                fill={ISO_BAND_COLORS[iso] ?? "#999"}
+                opacity={0.6}
+              >
+                {iso}
+              </text>
+            </g>
+          ))}
 
           {/* Bubbles */}
           {data.map((d) => {
             const cx = xScale(getXValue(d, metric, weighting)) ?? 0;
-            const cy = yScale(getYValue(d, priceMetric)) ?? 0;
+            const cy = yScale(getYValue(d, priceMetric, granularity)) ?? 0;
             const r = rScale(d.peak_demand_gw);
             return (
               <g key={d.id}>
@@ -182,9 +281,9 @@ export function ElectricityScatter({ data }: Props) {
                   cy={cy}
                   r={r}
                   fill={GROUP_FILLS[d.color_group]}
-                  fillOpacity={0.55}
+                  fillOpacity={isStateView ? 0.45 : 0.55}
                   stroke={GROUP_STROKES[d.color_group]}
-                  strokeWidth={1.5}
+                  strokeWidth={isStateView ? 1 : 1.5}
                   style={{ cursor: "pointer", transition: "all 0.2s ease" }}
                   onMouseEnter={() => handleMouseEnter(d, cx, cy)}
                   onMouseLeave={hideTooltip}
@@ -193,10 +292,10 @@ export function ElectricityScatter({ data }: Props) {
             );
           })}
 
-          {/* Direct labels */}
-          {data.map((d) => {
+          {/* Direct labels — ISO view: always visible. State view: hover-only (no persistent labels). */}
+          {!isStateView && data.map((d) => {
             const cx = xScale(getXValue(d, metric, weighting)) ?? 0;
-            const cy = yScale(getYValue(d, priceMetric)) ?? 0;
+            const cy = yScale(getYValue(d, priceMetric, granularity)) ?? 0;
             const [dx, dy] = LABEL_OFFSETS[d.id]?.[getViewKey(metric, weighting)] ?? [15, -15];
             return (
               <text
@@ -214,47 +313,67 @@ export function ElectricityScatter({ data }: Props) {
             );
           })}
 
-          {/* ERCOT 2023 price annotation — dashed line from current to $55 */}
-          {(() => {
-            const ercot = data.find((d) => d.id === "ERCOT");
-            if (!ercot || !ercot.price_2023_mwh) return null;
-            const cx = xScale(getXValue(ercot, metric, weighting)) ?? 0;
-            const cyNow = yScale(getYValue(ercot, priceMetric)) ?? 0;
-            const rawCy2023 = yScale(ercot.price_2023_mwh) ?? 0;
-            // Clamp to top of chart if $55 is above y-axis range
-            const cy2023 = Math.max(rawCy2023, 0);
-            // Place label at midpoint of the line, to the left
-            const labelY = (cyNow + cy2023) / 2;
+          {/* State view: small 2-letter code near each bubble (subtle, not overlapping) */}
+          {isStateView && data.map((d) => {
+            const cx = xScale(getXValue(d, metric, weighting)) ?? 0;
+            const cy = yScale(getYValue(d, priceMetric, granularity)) ?? 0;
+            const r = rScale(d.peak_demand_gw);
             return (
-              <g style={{ pointerEvents: "none" }}>
-                <line
-                  x1={cx}
-                  y1={cyNow}
-                  x2={cx}
-                  y2={cy2023}
-                  stroke={GROUP_STROKES.functional}
-                  strokeWidth={1.2}
-                  strokeDasharray="4 3"
-                  opacity={0.5}
-                />
-                <circle cx={cx} cy={cy2023} r={3} fill={GROUP_STROKES.functional} opacity={0.5} />
-                <text
-                  x={cx - 8}
-                  y={labelY}
-                  textAnchor="end"
-                  fontFamily={FONT.body}
-                  fontSize={10}
-                  fill={GROUP_STROKES.functional}
-                  opacity={0.7}
-                >
-                  2023: ${ercot.price_2023_mwh}/MWh
-                </text>
-              </g>
+              <text
+                key={`state-label-${d.id}`}
+                x={cx}
+                y={cy - r - 3}
+                textAnchor="middle"
+                fontFamily={FONT.body}
+                fontSize={9}
+                fontWeight={600}
+                fill={GROUP_STROKES[d.color_group]}
+                opacity={0.7}
+                style={{ pointerEvents: "none" }}
+              >
+                {d.id}
+              </text>
             );
-          })()}
+          })}
 
-          {/* CAISO "Mandate-driven" persistent annotation */}
-          {(() => {
+          {/* Queue cohort mismatch warning — ISO queue view only */}
+          {!isStateView && metric === "queue" && (
+            <g>
+              <rect
+                x={xMax - 260}
+                y={yMax - 52}
+                width={254}
+                height={44}
+                fill="#fff8e1"
+                stroke="#f9a825"
+                strokeWidth={1}
+                rx={4}
+                opacity={0.92}
+              />
+              <text
+                x={xMax - 252}
+                y={yMax - 32}
+                fontFamily={FONT.body}
+                fontSize={10}
+                fontWeight={600}
+                fill="#e65100"
+              >
+                {"⚠ Queue cohort mismatch"}
+              </text>
+              <text
+                x={xMax - 252}
+                y={yMax - 18}
+                fontFamily={FONT.body}
+                fontSize={9}
+                fill="#795548"
+              >
+                {"ERCOT uses 2018–2020; all others use 2000–2019."}
+              </text>
+            </g>
+          )}
+
+          {/* CAISO "Mandate-driven" persistent annotation — ISO view only */}
+          {!isStateView && (() => {
             const caiso = data.find((d) => d.id === "CAISO");
             if (!caiso) return null;
             const cx = xScale(getXValue(caiso, metric, weighting)) ?? 0;
@@ -293,7 +412,7 @@ export function ElectricityScatter({ data }: Props) {
             }
           />
           {/* Queue cohort footnote below x-axis */}
-          {metric === "queue" && (
+          {metric === "queue" && !isStateView && (
             <text
               x={xMax / 2}
               y={yMax + 68}
@@ -306,10 +425,23 @@ export function ElectricityScatter({ data }: Props) {
               * ERCOT: 2018–2020 cohort (Brattle/AEU); all others: 2000–2019 (LBNL Queued Up)
             </text>
           )}
+          {metric === "queue" && isStateView && (
+            <text
+              x={xMax / 2}
+              y={yMax + 68}
+              textAnchor="middle"
+              fontFamily={FONT.body}
+              fontSize={9.5}
+              fontStyle="italic"
+              fill="#999"
+            >
+              Queue completion rates are ISO-level estimates inherited by states within each ISO
+            </text>
+          )}
 
           <AxisLeft
             scale={yScale}
-            label={getYLabel(priceMetric)}
+            label={getYLabel(priceMetric, granularity)}
             stroke={AXIS_STYLE.strokeColor}
             tickStroke={AXIS_STYLE.tickStroke}
             tickLabelProps={() => ({
@@ -321,7 +453,7 @@ export function ElectricityScatter({ data }: Props) {
               ...AXIS_STYLE.labelProps,
               dx: -28,
             }}
-            tickFormat={(v) => `$${v}`}
+            tickFormat={(v) => isStateView ? `${v}¢` : `$${v}`}
           />
         </Group>
 
@@ -333,9 +465,9 @@ export function ElectricityScatter({ data }: Props) {
             fill="#999"
             dy={-6}
           >
-            Bubble size = system peak demand
+            Bubble size = {isStateView ? "state" : "system"} peak demand
           </text>
-          {[25, 80, 150].map((gw, i) => {
+          {(isStateView ? [5, 20, 50] : [25, 80, 150]).map((gw, i) => {
             const r = rScale(gw);
             const cx = i * 56 + 14;
             return (
@@ -370,6 +502,7 @@ export function ElectricityScatter({ data }: Props) {
           data={tooltipData}
           priceMetric={priceMetric}
           weighting={weighting}
+          granularity={granularity}
           top={tooltipTop ?? 0}
           left={tooltipLeft ?? 0}
         />
@@ -442,12 +575,17 @@ export function ElectricityScatter({ data }: Props) {
 
       {/* Queue Completion Bar Chart (Panel B) */}
       <div style={{ marginTop: 16, borderTop: "1px solid #e8e8e8", paddingTop: 16 }}>
-        <QueueCompletionBar data={data} marginLeft={MARGIN.left} width={WIDTH} />
+        <QueueCompletionBar
+          data={data}
+          marginLeft={MARGIN.left}
+          width={WIDTH}
+          granularity={granularity}
+        />
       </div>
 
       {/* Methodology & Data Notes (collapsible) */}
       <div style={{ paddingLeft: MARGIN.left, paddingRight: MARGIN.right }}>
-        <MethodologyNotes />
+        <MethodologyNotes granularity={granularity} />
       </div>
     </div>
   );

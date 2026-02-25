@@ -1,8 +1,10 @@
 import { ElectricityScatter } from "./components/ElectricityScatter";
-import dataset from "../data/verified/iso_scatter_data.json";
-import type { ISOScatterDataset } from "./lib/types";
+import isoDataset from "../data/verified/iso_scatter_data.json";
+import stateDataset from "../data/verified/state_scatter_data.json";
+import type { ISOScatterDataset, ISODataPoint } from "./lib/types";
 
-const data = dataset as ISOScatterDataset;
+const isoData = isoDataset as ISOScatterDataset;
+const stateData = stateDataset as { metadata: ISOScatterDataset["metadata"]; states: ISODataPoint[] };
 
 export default function App() {
   return (
@@ -15,7 +17,10 @@ export default function App() {
         background: "#fff",
       }}
     >
-      <ElectricityScatter data={data.isos} />
+      <ElectricityScatter
+        isoData={isoData.isos}
+        stateData={stateData.states}
+      />
     </div>
   );
 }

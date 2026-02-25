@@ -1,5 +1,7 @@
 export type ColorGroup = "functional" | "intermediate" | "broken";
 
+export type GranularityLevel = "iso" | "state";
+
 export type XAxisMetric = "capacity" | "queue";
 
 export type PriceMetric = "energy" | "all_in";
@@ -19,6 +21,7 @@ export interface ISODataPoint {
   queue_completion_pct: number;
   queue_cohort?: string;
   price_2023_mwh?: number;
+  retail_price_cents_kwh?: number;
   color_group: ColorGroup;
   qualitative_note: string;
   sources: {

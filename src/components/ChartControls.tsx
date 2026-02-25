@@ -1,14 +1,21 @@
-import type { XAxisMetric, PriceMetric, CapacityWeighting } from "../lib/types";
+import type { XAxisMetric, PriceMetric, CapacityWeighting, GranularityLevel } from "../lib/types";
 import { FONT } from "../lib/theme";
 
 interface Props {
+  granularity: GranularityLevel;
   xMetric: XAxisMetric;
   yMetric: PriceMetric;
   weighting: CapacityWeighting;
+  onGranularityChange: (g: GranularityLevel) => void;
   onXChange: (m: XAxisMetric) => void;
   onYChange: (m: PriceMetric) => void;
   onWeightingChange: (w: CapacityWeighting) => void;
 }
+
+const granularityOptions: { value: GranularityLevel; label: string }[] = [
+  { value: "iso", label: "RTO/ISO" },
+  { value: "state", label: "State" },
+];
 
 const xOptions: { value: XAxisMetric; label: string }[] = [
   { value: "capacity", label: "New Capacity (MW / GW peak)" },
@@ -59,9 +66,11 @@ function ToggleButton<T extends string>({
 }
 
 export function ChartControls({
+  granularity,
   xMetric,
   yMetric,
   weighting,
+  onGranularityChange,
   onXChange,
   onYChange,
   onWeightingChange,
@@ -78,32 +87,50 @@ export function ChartControls({
     >
       <div style={{ display: "flex", gap: 4, alignItems: "center" }}>
         <span style={{ color: "#888", marginRight: 4, lineHeight: "30px", minWidth: 80 }}>
-          X-axis:
+          View by:
         </span>
-        {xOptions.map((o) => (
+        {granularityOptions.map((o) => (
           <ToggleButton
             key={o.value}
             value={o.value}
             label={o.label}
-            active={xMetric === o.value}
-            onClick={onXChange}
+            active={granularity === o.value}
+            onClick={onGranularityChange}
           />
         ))}
       </div>
-      <div style={{ display: "flex", gap: 4, alignItems: "center" }}>
-        <span style={{ color: "#888", marginRight: 4, lineHeight: "30px", minWidth: 80 }}>
-          Y-axis:
-        </span>
-        {yOptions.map((o) => (
-          <ToggleButton
-            key={o.value}
-            value={o.value}
-            label={o.label}
-            active={yMetric === o.value}
-            onClick={onYChange}
-          />
-        ))}
-      </div>
+      {granularity !== "state" && (
+        <div style={{ display: "flex", gap: 4, alignItems: "center" }}>
+          <span style={{ color: "#888", marginRight: 4, lineHeight: "30px", minWidth: 80 }}>
+            X-axis:
+          </span>
+          {xOptions.map((o) => (
+            <ToggleButton
+              key={o.value}
+              value={o.value}
+              label={o.label}
+              active={xMetric === o.value}
+              onClick={onXChange}
+            />
+          ))}
+        </div>
+      )}
+      {granularity !== "state" && (
+        <div style={{ display: "flex", gap: 4, alignItems: "center" }}>
+          <span style={{ color: "#888", marginRight: 4, lineHeight: "30px", minWidth: 80 }}>
+            Y-axis:
+          </span>
+          {yOptions.map((o) => (
+            <ToggleButton
+              key={o.value}
+              value={o.value}
+              label={o.label}
+              active={yMetric === o.value}
+              onClick={onYChange}
+            />
+          ))}
+        </div>
+      )}
       {xMetric === "capacity" && (
         <div style={{ display: "flex", gap: 4, alignItems: "center" }}>
           <span style={{ color: "#888", marginRight: 4, lineHeight: "30px", minWidth: 80 }}>

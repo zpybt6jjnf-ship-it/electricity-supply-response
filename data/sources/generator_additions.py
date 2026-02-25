@@ -31,6 +31,14 @@ class GeneratorAdditions:
     count_by_iso: dict[str, int]
 
 
+@dataclass
+class StateGeneratorAdditions:
+    """MW totals, project counts, and technology mix by state."""
+    mw_by_state: dict[str, float]
+    count_by_state: dict[str, int]
+    tech_mix_by_state: dict[str, dict[str, float]]  # state → {technology: MW}
+
+
 # Common column name variations across EIA-860M vintages.
 # We normalize to a canonical set after reading.
 _COL_ALIASES = {
@@ -153,3 +161,93 @@ def _normalize_columns(df: pd.DataFrame) -> pd.DataFrame:
         if col_lower in _COL_ALIASES:
             rename_map[col] = _COL_ALIASES[col_lower]
     return df.rename(columns=rename_map)
+
+
+# Technology column aliases for ELCC computation.
+_TECH_COL_ALIASES = {
+    "technology": "technology",
+    "prime mover": "technology",
+    "energy source": "energy_source",
+    "energy source 1": "energy_source",
+    "energy_source_1": "energy_source",
+}
+
+
+def parse_generator_additions_by_state(
+    filepath: Path,
+    year: int = 2024,
+) -> StateGeneratorAdditions:
+    """Parse EIA-860M and return new capacity additions by state for a given year.
+
+    Uses the 'Plant State' column from EIA-860M to group generators by state.
+    Also extracts technology/energy source for ELCC weighting.
+
+    Args:
+        filepath: Path to the EIA-860M Excel file.
+        year: Target year to filter for new commercial operations.
+
+    Returns:
+        StateGeneratorAdditions with MW totals, generator counts, and
+        technology mix by state. Only includes states with nonzero additions.
+
+    Raises:
+        FileNotFoundError: If the filepath doesn't exist.
+        ValueError: If required columns are missing.
+    """
+    if not filepath.exists():
+        raise FileNotFoundError(f"EIA-860M file not found: {filepath}")
+
+    df = _read_generator_sheet(filepath)
+    df = _normalize_columns(df)
+
+    # Also normalize technology columns.
+    for col in df.columns:
+        col_lower = str(col).strip().lower()
+        if col_lower in _TECH_COL_ALIASES:
+            df = df.rename(columns={col: _TECH_COL_ALIASES[col_lower]})
+
+    # Validate required columns.
+    required = {"state", "operating_year", "capacity_mw"}
+    missing = required - set(df.columns)
+    if missing:
+        raise ValueError(
+            f"Missing required columns after normalization: {missing}. "
+            f"Available columns: {list(df.columns)}"
+        )
+
+    # Filter for generators that began operating in the target year.
+    df["operating_year"] = pd.to_numeric(df["operating_year"], errors="coerce")
+    df["capacity_mw"] = pd.to_numeric(df["capacity_mw"], errors="coerce")
+    new_gen = df[df["operating_year"] == year].copy()
+
+    # Keep only operating units.
+    if "status" in new_gen.columns:
+        new_gen = new_gen[
+            new_gen["status"].astype(str).str.strip().str.upper().isin(
+                ["OP", "OA", "OS", "SB"]
+            )
+        ]
+
+    # Clean state column.
+    new_gen["state"] = new_gen["state"].astype(str).str.strip().str.upper()
+    new_gen = new_gen.dropna(subset=["state", "capacity_mw"])
+    new_gen = new_gen[new_gen["state"].str.len() == 2]  # Valid 2-letter codes
+
+    # Aggregate MW by state.
+    mw_result = new_gen.groupby("state")["capacity_mw"].sum().to_dict()
+    count_result = new_gen.groupby("state")["capacity_mw"].count().to_dict()
+
+    # Technology mix by state (for ELCC computation).
+    tech_col = "technology" if "technology" in new_gen.columns else "energy_source"
+    tech_mix: dict[str, dict[str, float]] = {}
+    if tech_col in new_gen.columns:
+        for state, group in new_gen.groupby("state"):
+            state_str = str(state)
+            mix = group.groupby(tech_col)["capacity_mw"].sum().to_dict()
+            tech_mix[state_str] = {str(k): round(v) for k, v in mix.items() if v > 0}
+
+    return StateGeneratorAdditions(
+        mw_by_state={s: round(mw) for s, mw in mw_result.items() if mw > 0},
+        count_by_state={s: int(n) for s, n in count_result.items() if n > 0},
+        tech_mix_by_state=tech_mix,
+    )

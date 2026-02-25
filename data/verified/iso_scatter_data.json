@@ -15,7 +15,7 @@
       "all_in_price_mwh": 27.33,
       "capacity_additions_mw": 18700,
       "project_count": 180,
-      "peak_demand_gw": 85.6,
+      "peak_demand_gw": 85.2,
       "queue_completion_pct": 42.6,
       "capacity_additions_elcc_mw": 9800,
       "queue_cohort": "2018–2020",
@@ -25,8 +25,8 @@
       "sources": {
         "price": "E3 2024 ERCOT Market Update (ERCOT North Hub DA avg)",
         "capacity": "E3; IEEFA; Dallas Fed; Amperon (9.7 GW solar, 4.4 GW battery, 3.4 GW gas, ~1.2 GW wind)",
-        "peak": "ERCOT (all-time record, Aug 20 2024)",
-        "queue": "Brattle/AEU Generator Interconnection Scorecard (2018–2020 cohort)"
+        "peak": "ERCOT (settled value, Aug 20 2024; below 2023 record of 85.5 GW)",
+        "queue": "Brattle/Grid Strategies/AEU Scorecard (2018–2020 cohort, 42.6%)"
       }
     },
     {
@@ -47,7 +47,7 @@
         "price": "SPP 2024 Annual State of the Market Report (DA system avg)",
         "capacity": "SPP ELCC Report; Amperon (1.2 GW wind, 0.5 GW solar, 0.8 GW battery)",
         "peak": "SPP 2024 State of the Market (est. ~3% below 2023)",
-        "queue": "LBNL Queued Up; Brattle Scorecard"
+        "queue": "LBNL Queued Up (2000–2019 cohort); Brattle Scorecard reports <10% for 2018–2020"
       }
     },
     {
@@ -59,16 +59,16 @@
       "capacity_additions_mw": 7500,
       "project_count": 90,
       "peak_demand_gw": 121.6,
-      "queue_completion_pct": 30,
+      "queue_completion_pct": 28,
       "capacity_additions_elcc_mw": 3300,
       "queue_cohort": "2000–2019",
       "color_group": "functional",
-      "qualitative_note": "Largest US ISO by geographic footprint. Solar installations doubled in 2024. Queue reforms (MTEP cycles) improving throughput, but ~70% of projects still never reach fruition.",
+      "qualitative_note": "Largest US ISO by geographic footprint. Solar installations doubled in 2024. Queue reforms (MTEP cycles) improving throughput, but ~72% of projects still never reach fruition.",
       "sources": {
         "price": "Potomac Economics 2024 MISO State of the Market (RT avg LMP)",
         "capacity": "MISO confirmed 7.5 GW to COD in 2024 (Brattle); ~6.7 GW solar, ~0.8 GW wind+other",
         "peak": "Amperon (Aug 26 2024)",
-        "queue": "Concentric Energy Advisors; LBNL Queued Up"
+        "queue": "Brattle/Grid Strategies/AEU Scorecard (2018–2020 cohort, 28.3%); LBNL Queued Up 2025 (2000–2019 aggregate)"
       }
     },
     {
@@ -87,9 +87,9 @@
       "qualitative_note": "Battery storage leader — added 4.2 GW of batteries in 2024. High additions driven by state mandates, but only ~10% of queue projects reach operation. Duck curve dynamics suppress midday prices.",
       "sources": {
         "price": "CAISO DMM Q3/Q4 2024 Quarterly Reports (est. annual DA avg)",
-        "capacity": "CAISO 2024 Battery Storage Special Report; Amperon (4.2 GW battery, 3 GW solar)",
+        "capacity": "CAISO 2024 Battery Storage Special Report; Amperon (4.2 GW battery, 3 GW solar). Note: EIA projected ~4.8 GW solar for CAISO in 2024; the 3 GW used here is conservative pending final EIA-860M filing confirmation.",
         "peak": "Amperon (Sept 5 2024)",
-        "queue": "Concentric Energy Advisors; LBNL Queued Up"
+        "queue": "LBNL Queued Up (2000–2019 cohort); Concentric Energy Advisors; Brattle Scorecard reports <10% for 2018–2020"
       }
     },
     {
@@ -110,7 +110,7 @@
         "price": "Monitoring Analytics 2024 PJM State of the Market (RT LW avg LMP)",
         "capacity": "PJM SOM; Amperon (4.5 GW solar, 0.29 GW wind, 43 MW storage)",
         "peak": "Amperon; PJM (July 16 2024)",
-        "queue": "LBNL Queued Up; RMI; Brattle Scorecard"
+        "queue": "LBNL Queued Up (2000–2019 cohort); RMI; Brattle Scorecard reports <10% for 2018–2020"
       }
     },
     {
@@ -131,7 +131,7 @@
         "price": "NYISO 'Impact of National & Global Conditions on Electricity Prices in New York' white paper (2024 avg wholesale price)",
         "capacity": "NYISO Winter Assessment; ESAI Power (~452 MW pre-summer, ~935 MW total)",
         "peak": "NYISO (actual 2024 peak ~29.0 GW, July 8 2024)",
-        "queue": "LBNL Queued Up; Brattle Scorecard"
+        "queue": "LBNL Queued Up (2000–2019 cohort); Brattle Scorecard reports <10% for 2018–2020"
       }
     },
     {
@@ -147,12 +147,12 @@
       "capacity_additions_elcc_mw": 200,
       "queue_cohort": "2000–2019",
       "color_group": "broken",
-      "qualitative_note": "Energy + FCA capacity cost ~$51/MWh (comparable basis). Published $87/MWh total includes RECs, RGGI, ancillary, and transmission. Vineyard Wind delivered only 136 MW before construction pause. Gas dependence + pipeline constraints drive winter price spikes. Worst queue completion rate nationally.",
+      "qualitative_note": "Energy + FCA capacity cost ~$51/MWh (comparable basis). Published $87/MWh total includes RECs, RGGI, ancillary, and transmission. Vineyard Wind blade failure (July 2024) shut down all 136 MW for ~6 months; operational contribution in 2024 was severely limited. Gas dependence + pipeline constraints drive winter price spikes. Worst queue completion rate nationally.",
       "sources": {
         "price": "ISO-NE Internal Market Monitor 2024 Annual Markets Report (DA avg)",
         "capacity": "ISO Newswire; Vineyard Wind (136 MW offshore wind, ~200 MW solar, ~64 MW other)",
         "peak": "FEL Power; ISO-NE (July 16 2024)",
-        "queue": "LBNL Queued Up; Brattle/AEU Scorecard"
+        "queue": "LBNL Queued Up (2000–2019 cohort); Brattle/AEU Scorecard reports <10% for 2018–2020"
       }
     }
   ]

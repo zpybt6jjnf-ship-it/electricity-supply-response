@@ -31,6 +31,7 @@ _DATA_DIR = Path(__file__).resolve().parent
 _RAW_DIR = _DATA_DIR / "raw"
 _VERIFIED_DIR = _DATA_DIR / "verified"
 _OUTPUT_FILE = _VERIFIED_DIR / "iso_scatter_data.json"
+_STATE_OUTPUT_FILE = _VERIFIED_DIR / "state_scatter_data.json"
 
 
 def main() -> None:
@@ -49,15 +50,32 @@ def main() -> None:
     peaks = _collect_peak_demand()
     queue_rates = _collect_queue_completion()
 
-    # Merge into the output structure.
+    # Collect state-level data.
+    state_additions_mw, state_additions_count, state_tech_mix = (
+        _collect_state_generator_additions()
+    )
+    state_peaks = _collect_state_peak_demand()
+    state_queue_rates = _collect_state_queue_completion()
+
+    # Merge into the output structures.
     dataset = _build_output(prices, additions_mw, additions_count, peaks, queue_rates)
 
-    # Write output.
+    # Write ISO output.
     _OUTPUT_FILE.parent.mkdir(parents=True, exist_ok=True)
     with open(_OUTPUT_FILE, "w") as f:
         json.dump(dataset, f, indent=2)
     print()
     print(f"  Output written to {_OUTPUT_FILE}")
+
+    # Build and write state output.
+    state_dataset = _build_state_output(
+        prices, queue_rates,
+        state_additions_mw, state_additions_count, state_tech_mix,
+        state_peaks, state_queue_rates,
+    )
+    with open(_STATE_OUTPUT_FILE, "w") as f:
+        json.dump(state_dataset, f, indent=2)
+    print(f"  Output written to {_STATE_OUTPUT_FILE}")
     print("  Done.")
 
 
@@ -136,6 +154,204 @@ def _collect_queue_completion() -> dict[str, float]:
     except Exception as exc:
         print(f"  ERROR: {exc}")
         return {}
+
+
+def _collect_state_generator_additions(
+) -> tuple[dict[str, float], dict[str, int], dict[str, dict[str, float]]]:
+    """Run the generator additions parser at state level."""
+    print("[5/7] State generator additions (EIA-860M)...")
+
+    filepath = _RAW_DIR / "eia860m.xlsx"
+    if not filepath.exists():
+        print(f"  SKIP: {filepath.name} not found in data/raw/")
+        return {}, {}, {}
+
+    try:
+        from .sources.generator_additions import parse_generator_additions_by_state
+        result = parse_generator_additions_by_state(filepath, year=2024)
+        print(
+            f"  OK: got additions for {len(result.mw_by_state)} states — "
+            f"{list(result.mw_by_state.keys())[:10]}..."
+        )
+        return result.mw_by_state, result.count_by_state, result.tech_mix_by_state
+    except Exception as exc:
+        print(f"  ERROR: {exc}")
+        return {}, {}, {}
+
+
+def _collect_state_peak_demand() -> dict[str, float]:
+    """Run the state peak demand parser."""
+    print("[6/7] State peak demand (EIA-861)...")
+
+    filepath = _RAW_DIR / "eia861.xlsx"
+    if not filepath.exists():
+        print(f"  SKIP: {filepath.name} not found in data/raw/")
+        return {}
+
+    try:
+        from .sources.state_peak_demand import parse_state_peak_demand
+        result = parse_state_peak_demand(filepath)
+        print(f"  OK: got peak demand for {len(result)} states")
+        return result
+    except Exception as exc:
+        print(f"  ERROR: {exc}")
+        return {}
+
+
+def _collect_state_queue_completion() -> dict[str, float]:
+    """Run the state queue completion parser."""
+    print("[7/7] State queue completion (LBNL Queued Up)...")
+
+    filepath = _RAW_DIR / "queued_up.xlsx"
+    if not filepath.exists():
+        print(f"  SKIP: {filepath.name} not found in data/raw/")
+        return {}
+
+    try:
+        from .sources.state_queue_completion import parse_state_queue_completion
+        result = parse_state_queue_completion(filepath)
+        if result:
+            print(f"  OK: got completion rates for {len(result)} states")
+        else:
+            print("  INFO: LBNL data does not include state-level records; "
+                  "states will inherit ISO rates")
+        return result
+    except Exception as exc:
+        print(f"  ERROR: {exc}")
+        return {}
+
+
+def _build_state_output(
+    iso_prices: dict[str, float],
+    iso_queue_rates: dict[str, float],
+    state_mw: dict[str, float],
+    state_counts: dict[str, int],
+    state_tech_mix: dict[str, dict[str, float]],
+    state_peaks: dict[str, float],
+    state_queue_rates: dict[str, float],
+) -> dict:
+    """Build state_scatter_data.json from state-level and ISO-level data.
+
+    States inherit wholesale price and queue completion from their parent ISO
+    (Option B hybrid approach). Capacity and peak demand are state-level.
+    """
+    from .sources.state_to_iso_mapping import (
+        STATE_TO_ISO, MULTI_ISO_STATES, STATE_NAMES,
+    )
+
+    # All-in prices by ISO (same as in _build_output).
+    _ALL_IN_PRICES: dict[str, float] = {
+        "ERCOT": 27.33, "SPP": 29.00, "MISO": 33.00,
+        "CAISO": 43.00, "PJM": 36.00, "NYISO": 50.00, "ISO-NE": 51.00,
+    }
+
+    # ELCC factors by technology (approximate).
+    _ELCC_FACTORS: dict[str, float] = {
+        "solar": 0.35, "wind": 0.25, "battery": 0.90,
+        "gas": 1.0, "natural gas": 1.0, "nuclear": 0.95,
+        "hydro": 0.50, "other": 0.50,
+    }
+
+    states = []
+    for state_code, iso in STATE_TO_ISO.items():
+        # Skip states without capacity additions.
+        if state_code not in state_mw:
+            continue
+
+        mw = state_mw[state_code]
+        if mw < 50:  # Minimum threshold for meaningful data point
+            continue
+
+        # Peak demand: use state data or skip.
+        peak = state_peaks.get(state_code)
+        if peak is None or peak < 0.5:
+            continue
+
+        # Compute ELCC from technology mix if available.
+        elcc_mw = None
+        tech_mix = state_tech_mix.get(state_code, {})
+        if tech_mix:
+            elcc_mw = sum(
+                mw_val * _ELCC_FACTORS.get(tech.lower(), 0.5)
+                for tech, mw_val in tech_mix.items()
+            )
+            elcc_mw = round(elcc_mw)
+
+        # Inherit price from parent ISO.
+        wholesale_price = iso_prices.get(iso)
+        all_in_price = _ALL_IN_PRICES.get(iso)
+        if wholesale_price is None or all_in_price is None:
+            continue
+
+        # Queue completion: state-level if available, else ISO fallback.
+        queue_pct = state_queue_rates.get(state_code)
+        queue_inherited = queue_pct is None
+        if queue_inherited:
+            queue_pct = iso_queue_rates.get(iso, 0)
+
+        entry = {
+            "id": state_code,
+            "name": STATE_NAMES.get(state_code, state_code),
+            "region": iso,
+            "wholesale_price_mwh": wholesale_price,
+            "all_in_price_mwh": all_in_price,
+            "capacity_additions_mw": round(mw),
+            "project_count": state_counts.get(state_code, 0),
+            "peak_demand_gw": peak,
+            "queue_completion_pct": queue_pct,
+            "color_group": _iso_to_color_group(iso),
+        }
+
+        if elcc_mw is not None:
+            entry["capacity_additions_elcc_mw"] = elcc_mw
+        if state_code in MULTI_ISO_STATES:
+            entry["qualitative_note"] = (
+                f"Spans multiple ISOs. Price from dominant ISO ({iso})."
+            )
+        else:
+            entry["qualitative_note"] = ""
+        if queue_inherited:
+            entry["queue_cohort"] = f"ISO-level ({iso})"
+        entry["sources"] = {
+            "price": f"Inherited from {iso} wholesale market",
+            "capacity": "EIA-860M plant state",
+            "peak": "EIA-861 state peak demand",
+            "queue": (
+                "LBNL Queued Up (state-level)" if not queue_inherited
+                else f"Inherited from {iso} (ISO-level)"
+            ),
+        }
+
+        states.append(entry)
+
+    return {
+        "metadata": {
+            "title": "US State-Level Electricity Supply Response Data",
+            "author": "Bottlenecks Lab",
+            "compiled": date.today().isoformat(),
+            "primary_year": 2024,
+            "notes": (
+                "State-level hybrid view: capacity from EIA-860M plant state, "
+                "peak demand from EIA-861, wholesale prices inherited from "
+                "parent ISO/RTO. See methodology notes for details."
+            ),
+        },
+        "states": states,
+    }
+
+
+def _iso_to_color_group(iso: str) -> str:
+    """Map ISO to color group for state-level entries."""
+    _COLOR_MAP = {
+        "ERCOT": "functional",
+        "MISO": "functional",
+        "SPP": "intermediate",
+        "CAISO": "intermediate",
+        "PJM": "intermediate",
+        "NYISO": "broken",
+        "ISO-NE": "broken",
+    }
+    return _COLOR_MAP.get(iso, "intermediate")
 
 
 def _build_output(

@@ -1,5 +1,5 @@
 import { scaleLinear, scaleSqrt } from "@visx/scale";
-import type { ISODataPoint, XAxisMetric, PriceMetric, CapacityWeighting } from "./types";
+import type { ISODataPoint, XAxisMetric, PriceMetric, CapacityWeighting, GranularityLevel } from "./types";
 import { capacityPerGwPeak, capacityPerGwPeakElcc } from "./types";
 
 export function getXValue(d: ISODataPoint, metric: XAxisMetric, weighting?: CapacityWeighting): number {
@@ -22,11 +22,17 @@ export function getXSubtitle(metric: XAxisMetric, weighting?: CapacityWeighting)
     : "Annual New Generation Reaching Commercial Operation (MW per GW of System Peak)";
 }
 
-export function getYValue(d: ISODataPoint, priceMetric: PriceMetric): number {
+export function getYValue(d: ISODataPoint, priceMetric: PriceMetric, granularity?: GranularityLevel): number {
+  if (granularity === "state" && d.retail_price_cents_kwh != null) {
+    return d.retail_price_cents_kwh;
+  }
   return priceMetric === "all_in" ? d.all_in_price_mwh : d.wholesale_price_mwh;
 }
 
-export function getYLabel(priceMetric: PriceMetric): string {
+export function getYLabel(priceMetric: PriceMetric, granularity?: GranularityLevel): string {
+  if (granularity === "state") {
+    return "Average Retail Electricity Price (cents/kWh)";
+  }
   return priceMetric === "all_in"
     ? "All-In Price ($/MWh, Energy + Capacity)"
     : "Average Wholesale Price ($/MWh)";
@@ -40,12 +46,13 @@ export function createScales(
   height: number,
   margin: { top: number; right: number; bottom: number; left: number },
   weighting?: CapacityWeighting,
+  granularity?: GranularityLevel,
 ) {
   const xMax = width - margin.left - margin.right;
   const yMax = height - margin.top - margin.bottom;
 
   const xValues = data.map((d) => getXValue(d, metric, weighting));
-  const priceValues = data.map((d) => getYValue(d, priceMetric));
+  const priceValues = data.map((d) => getYValue(d, priceMetric, granularity));
   const peakValues = data.map((d) => d.peak_demand_gw);
 
   // X-axis: capacity metric (supply response)
@@ -65,9 +72,11 @@ export function createScales(
     nice: true,
   });
 
+  // Bubble radius: smaller range for state view (many more points)
+  const rRange: [number, number] = granularity === "state" ? [6, 28] : [14, 48];
   const rScale = scaleSqrt<number>({
     domain: [Math.min(...peakValues), Math.max(...peakValues)],
-    range: [14, 48],
+    range: rRange,
   });
 
   return { xScale, yScale, rScale, xMax, yMax };

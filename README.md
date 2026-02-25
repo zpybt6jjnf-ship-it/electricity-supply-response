@@ -2,7 +2,7 @@
 
 Interactive scatter chart comparing wholesale electricity prices vs. new generation capacity across US ISOs/RTOs. Inspired by Owen Zidar's housing economics work (rents vs. building permits across metros).
 
-**Thesis**: ERCOT's streamlined interconnection and energy-only market produce a strong supply response — new generation gets built when prices signal need. ISO-NE and NYISO exhibit broken supply response — high prices persist because queue dysfunction and permitting friction block new supply.
+**Thesis**: Structural barriers to building new generation — queue dysfunction, permitting friction, multi-state coordination — are a key structural factor behind persistently high electricity prices, alongside fuel mix exposure, pipeline constraints, and carbon policy costs. ISOs that build easily (ERCOT, MISO) tend toward lower prices; ISOs that can't build (ISO-NE, NYISO) stay expensive.
 
 ## Quick Start
 
