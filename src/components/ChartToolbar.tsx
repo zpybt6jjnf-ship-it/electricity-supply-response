@@ -2,7 +2,7 @@ import { useState, useRef, useEffect, type RefObject } from "react";
 import { FONT } from "../lib/theme";
 
 const DEPLOY_URL =
-  "https://bottlenecks-lab.github.io/electricity-supply-response/";
+  "https://bottleneckslab.github.io/electricity-supply-response/";
 
 interface Props {
   svgRef: RefObject<SVGSVGElement | null>;

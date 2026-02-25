@@ -12,7 +12,7 @@ export default function App() {
       style={{
         display: "flex",
         justifyContent: "center",
-        padding: "40px 20px",
+        padding: "20px 12px",
         minHeight: "100vh",
         background: "#fff",
       }}

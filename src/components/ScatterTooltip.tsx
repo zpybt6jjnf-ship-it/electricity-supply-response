@@ -20,7 +20,7 @@ const tooltipStyles: React.CSSProperties = {
   fontSize: 13,
   lineHeight: 1.5,
   padding: "12px 16px",
-  maxWidth: 320,
+  maxWidth: "min(320px, 90vw)",
   boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
   border: "1px solid #ddd",
   borderRadius: 4,

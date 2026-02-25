@@ -54,7 +54,7 @@ export function MethodologyNotes({ granularity }: Props) {
       </button>
 
       {open && (
-        <div style={{ maxWidth: 680, marginTop: 8 }}>
+        <div style={{ maxWidth: "100%", marginTop: 8 }}>
           {granularity === "state" && (
             <>
               <h4 style={HEADING_STYLE}>State-level view</h4>

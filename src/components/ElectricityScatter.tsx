@@ -12,10 +12,9 @@ import { ChartControls } from "./ChartControls";
 import { ChartToolbar } from "./ChartToolbar";
 import { QueueCompletionBar } from "./QueueCompletionBar";
 import { MethodologyNotes } from "./MethodologyNotes";
+import { useContainerWidth } from "../lib/useContainerWidth";
 
-const WIDTH = 820;
-const HEIGHT = 580;
-const MARGIN = { top: 60, right: 50, bottom: 88, left: 82 };
+const MAX_WIDTH = 820;
 
 /**
  * Hand-tuned label offsets per ISO to avoid overlaps.
@@ -56,11 +55,26 @@ interface Props {
 }
 
 export function ElectricityScatter({ isoData, stateData }: Props) {
+  const [containerRef, containerWidth] = useContainerWidth();
   const [granularity, setGranularity] = useState<GranularityLevel>("iso");
   const [metric, setMetric] = useState<XAxisMetric>("queue");
   const [priceMetric, setPriceMetric] = useState<PriceMetric>("energy");
   const [weighting, setWeighting] = useState<CapacityWeighting>("nameplate");
+  const [tappedId, setTappedId] = useState<string | null>(null);
   const svgRef = useRef<SVGSVGElement>(null);
+
+  // Responsive dimensions
+  const width = containerWidth > 0 ? Math.min(containerWidth, MAX_WIDTH) : MAX_WIDTH;
+  const isCompact = width < 480;
+  const isMid = width >= 480 && width < MAX_WIDTH;
+
+  const margin = useMemo(() => {
+    if (isCompact) return { top: 48, right: 16, bottom: 72, left: 52 };
+    if (isMid) return { top: 52, right: 30, bottom: 80, left: 64 };
+    return { top: 60, right: 50, bottom: 88, left: 82 };
+  }, [isCompact, isMid]);
+
+  const height = isCompact ? 320 : isMid ? Math.round(width * 0.65) : 580;
 
   // Force capacity x-axis in state view (queue completion is ISO-level, not per-state)
   const handleGranularityChange = useCallback((g: GranularityLevel) => {
@@ -80,28 +94,52 @@ export function ElectricityScatter({ isoData, stateData }: Props) {
     tooltipOpen,
   } = useTooltip<ISODataPoint>();
 
+  // Smaller bubbles on compact
+  const rRangeOverride: [number, number] | undefined = isCompact
+    ? (isStateView ? [4, 18] : [8, 28])
+    : undefined;
+
   const { xScale, yScale, rScale, xMax, yMax } = createScales(
     data,
     metric,
     priceMetric,
-    WIDTH,
-    HEIGHT,
-    MARGIN,
+    width,
+    height,
+    margin,
     weighting,
     granularity,
+    rRangeOverride,
   );
 
   const handleMouseEnter = useCallback(
     (d: ISODataPoint, cx: number, cy: number) => {
       showTooltip({
         tooltipData: d,
-        tooltipLeft: cx + MARGIN.left,
-        tooltipTop: cy + MARGIN.top,
+        tooltipLeft: cx + margin.left,
+        tooltipTop: cy + margin.top,
       });
     },
-    [showTooltip],
+    [showTooltip, margin.left, margin.top],
   );
 
+  // Tap-to-toggle tooltips on compact
+  const handleBubbleClick = useCallback(
+    (d: ISODataPoint, cx: number, cy: number) => {
+      if (!isCompact) return;
+      if (tappedId === d.id) {
+        setTappedId(null);
+        hideTooltip();
+      } else {
+        setTappedId(d.id);
+        showTooltip({
+          tooltipData: d,
+          tooltipLeft: cx + margin.left,
+          tooltipTop: cy + margin.top,
+        });
+      }
+    },
+    [isCompact, tappedId, hideTooltip, showTooltip, margin.left, margin.top],
+  );
 
   // Compute ISO bands for state view using min/max retail price per ISO.
   const isoBands = useMemo(() => {
@@ -137,14 +175,21 @@ export function ElectricityScatter({ isoData, stateData }: Props) {
     ? "New Capacity vs. Retail Electricity Price by State"
     : "New Capacity vs. Wholesale Price Across RTOs/ISOs";
 
+  // Bubble legend config
+  const legendItems = isCompact
+    ? (isStateView ? [10, 40] : [50, 150])
+    : (isStateView ? [5, 20, 50] : [25, 80, 150]);
+  const legendSpacing = isCompact ? 48 : 56;
+  const legendWidth = legendItems.length * legendSpacing + 14;
+
   return (
-    <div style={{ position: "relative", minWidth: WIDTH }}>
+    <div ref={containerRef} style={{ position: "relative", width: "100%", maxWidth: MAX_WIDTH }}>
       {/* Title block */}
-      <div style={{ marginBottom: 2, paddingLeft: MARGIN.left }}>
+      <div style={{ marginBottom: 2, paddingLeft: margin.left }}>
         <h2
           style={{
             fontFamily: FONT.title,
-            fontSize: 19,
+            fontSize: isCompact ? 15 : 19,
             fontWeight: 700,
             color: "#1a1a1a",
             margin: 0,
@@ -156,14 +201,14 @@ export function ElectricityScatter({ isoData, stateData }: Props) {
         <p
           style={{
             fontFamily: FONT.body,
-            fontSize: 13,
+            fontSize: isCompact ? 11 : 13,
             color: "#666",
             margin: "2px 0 0",
           }}
         >
           {getXSubtitle(metric, weighting)}, 2024
           {isStateView && (
-            <span style={{ color: "#999", marginLeft: 8, fontSize: 11 }}>
+            <span style={{ color: "#999", marginLeft: 8, fontSize: isCompact ? 9 : 11 }}>
               State retail prices from EIA (2024 avg, all sectors)
             </span>
           )}
@@ -171,8 +216,9 @@ export function ElectricityScatter({ isoData, stateData }: Props) {
       </div>
 
       {/* Controls */}
-      <div style={{ marginBottom: 4, paddingLeft: MARGIN.left }}>
+      <div style={{ marginBottom: 4, paddingLeft: margin.left }}>
         <ChartControls
+          compact={isCompact}
           granularity={granularity}
           xMetric={metric}
           yMetric={priceMetric}
@@ -185,8 +231,8 @@ export function ElectricityScatter({ isoData, stateData }: Props) {
       </div>
 
       {/* SVG chart */}
-      <svg ref={svgRef} width={WIDTH} height={HEIGHT} style={{ overflow: "visible" }}>
-        <Group top={MARGIN.top} left={MARGIN.left}>
+      <svg ref={svgRef} width={width} height={height} style={{ overflow: "visible" }}>
+        <Group top={margin.top} left={margin.left}>
           {/* Grid */}
           <GridRows
             scale={yScale}
@@ -214,20 +260,22 @@ export function ElectricityScatter({ isoData, stateData }: Props) {
                 opacity={0.04}
                 rx={2}
               />
-              {/* ISO label on right edge */}
-              <text
-                x={xMax + 6}
-                y={yCenter}
-                textAnchor="start"
-                dominantBaseline="central"
-                fontFamily={FONT.body}
-                fontSize={10}
-                fontWeight={600}
-                fill={ISO_BAND_COLORS[iso] ?? "#999"}
-                opacity={0.6}
-              >
-                {iso}
-              </text>
+              {/* ISO label on right edge — hidden on compact */}
+              {!isCompact && (
+                <text
+                  x={xMax + 6}
+                  y={yCenter}
+                  textAnchor="start"
+                  dominantBaseline="central"
+                  fontFamily={FONT.body}
+                  fontSize={10}
+                  fontWeight={600}
+                  fill={ISO_BAND_COLORS[iso] ?? "#999"}
+                  opacity={0.6}
+                >
+                  {iso}
+                </text>
+              )}
             </g>
           ))}
 
@@ -247,15 +295,16 @@ export function ElectricityScatter({ isoData, stateData }: Props) {
                   stroke={GROUP_STROKES[d.color_group]}
                   strokeWidth={isStateView ? 1 : 1.5}
                   style={{ cursor: "pointer", transition: "all 0.2s ease" }}
-                  onMouseEnter={() => handleMouseEnter(d, cx, cy)}
-                  onMouseLeave={hideTooltip}
+                  onMouseEnter={isCompact ? undefined : () => handleMouseEnter(d, cx, cy)}
+                  onMouseLeave={isCompact ? undefined : hideTooltip}
+                  onClick={() => handleBubbleClick(d, cx, cy)}
                 />
               </g>
             );
           })}
 
-          {/* Direct labels — ISO view: always visible. State view: hover-only (no persistent labels). */}
-          {!isStateView && data.map((d) => {
+          {/* Direct labels — ISO view only, hidden on compact */}
+          {!isStateView && !isCompact && data.map((d) => {
             const cx = xScale(getXValue(d, metric, weighting)) ?? 0;
             const cy = yScale(getYValue(d, priceMetric, granularity)) ?? 0;
             const [dx, dy] = LABEL_OFFSETS[d.id]?.[getViewKey(metric, weighting)] ?? [15, -15];
@@ -275,8 +324,8 @@ export function ElectricityScatter({ isoData, stateData }: Props) {
             );
           })}
 
-          {/* State view: small 2-letter code near each bubble (subtle, not overlapping) */}
-          {isStateView && data.map((d) => {
+          {/* State view: small 2-letter code near each bubble — hidden on compact */}
+          {isStateView && !isCompact && data.map((d) => {
             const cx = xScale(getXValue(d, metric, weighting)) ?? 0;
             const cy = yScale(getYValue(d, priceMetric, granularity)) ?? 0;
             const r = rScale(d.peak_demand_gw);
@@ -321,7 +370,7 @@ export function ElectricityScatter({ isoData, stateData }: Props) {
               y={yMax + 68}
               textAnchor="middle"
               fontFamily={FONT.body}
-              fontSize={9.5}
+              fontSize={isCompact ? 8 : 9.5}
               fontStyle="italic"
               fill="#999"
             >
@@ -334,7 +383,7 @@ export function ElectricityScatter({ isoData, stateData }: Props) {
               y={yMax + 68}
               textAnchor="middle"
               fontFamily={FONT.body}
-              fontSize={9.5}
+              fontSize={isCompact ? 8 : 9.5}
               fontStyle="italic"
               fill="#999"
             >
@@ -361,18 +410,18 @@ export function ElectricityScatter({ isoData, stateData }: Props) {
         </Group>
 
         {/* Bubble size legend — upper-right of chart area */}
-        <Group top={MARGIN.top + 8} left={MARGIN.left + xMax - 230}>
+        <Group top={margin.top + 8} left={margin.left + xMax - legendWidth}>
           <text
             fontFamily={FONT.body}
-            fontSize={10}
+            fontSize={isCompact ? 9 : 10}
             fill="#999"
             dy={-6}
           >
             Bubble size = {isStateView ? "state" : "system"} peak demand
           </text>
-          {(isStateView ? [5, 20, 50] : [25, 80, 150]).map((gw, i) => {
+          {legendItems.map((gw, i) => {
             const r = rScale(gw);
-            const cx = i * 56 + 14;
+            const cx = i * legendSpacing + 14;
             return (
               <g key={gw}>
                 <circle
@@ -415,10 +464,10 @@ export function ElectricityScatter({ isoData, stateData }: Props) {
       {/* Footer — attribution + toolbar */}
       <div
         style={{
-          maxWidth: WIDTH,
-          paddingLeft: MARGIN.left,
-          paddingRight: MARGIN.right,
-          marginTop: -20,
+          maxWidth: width,
+          paddingLeft: margin.left,
+          paddingRight: margin.right,
+          marginTop: isCompact ? 0 : -20,
         }}
       >
         {/* Attribution row */}
@@ -428,6 +477,7 @@ export function ElectricityScatter({ isoData, stateData }: Props) {
             alignItems: "center",
             gap: 6,
             marginBottom: 6,
+            flexWrap: "wrap",
           }}
         >
           {/* Logo mark */}
@@ -473,7 +523,7 @@ export function ElectricityScatter({ isoData, stateData }: Props) {
 
         {/* Toolbar row */}
         <div style={{ display: "flex", justifyContent: "flex-end" }}>
-          <ChartToolbar svgRef={svgRef} width={WIDTH} height={HEIGHT} />
+          <ChartToolbar svgRef={svgRef} width={width} height={height} />
         </div>
       </div>
 
@@ -481,14 +531,14 @@ export function ElectricityScatter({ isoData, stateData }: Props) {
       <div style={{ marginTop: 16, borderTop: "1px solid #e8e8e8", paddingTop: 16 }}>
         <QueueCompletionBar
           data={data}
-          marginLeft={MARGIN.left}
-          width={WIDTH}
+          marginLeft={margin.left}
+          width={width}
           granularity={granularity}
         />
       </div>
 
       {/* Methodology & Data Notes (collapsible) */}
-      <div style={{ paddingLeft: MARGIN.left, paddingRight: MARGIN.right }}>
+      <div style={{ paddingLeft: margin.left, paddingRight: margin.right }}>
         <MethodologyNotes granularity={granularity} />
       </div>
     </div>

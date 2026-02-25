@@ -47,6 +47,7 @@ export function createScales(
   margin: { top: number; right: number; bottom: number; left: number },
   weighting?: CapacityWeighting,
   granularity?: GranularityLevel,
+  rRangeOverride?: [number, number],
 ) {
   const xMax = width - margin.left - margin.right;
   const yMax = height - margin.top - margin.bottom;
@@ -73,7 +74,7 @@ export function createScales(
   });
 
   // Bubble radius: smaller range for state view (many more points)
-  const rRange: [number, number] = granularity === "state" ? [6, 28] : [14, 48];
+  const rRange: [number, number] = rRangeOverride ?? (granularity === "state" ? [6, 28] : [14, 48]);
   const rScale = scaleSqrt<number>({
     domain: [Math.min(...peakValues), Math.max(...peakValues)],
     range: rRange,
