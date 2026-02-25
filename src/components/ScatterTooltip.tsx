@@ -1,11 +1,12 @@
 import { defaultStyles, TooltipWithBounds } from "@visx/tooltip";
-import type { ISODataPoint, PriceMetric, CapacityWeighting, GranularityLevel } from "../lib/types";
+import type { ISODataPoint, XAxisMetric, PriceMetric, CapacityWeighting, GranularityLevel } from "../lib/types";
 import { capacityPerGwPeak, capacityPerGwPeakElcc, projectsPerGwPeak } from "../lib/types";
 import { FONT } from "../lib/theme";
 import { GROUP_FILLS } from "../lib/colors";
 
 interface Props {
   data: ISODataPoint;
+  xMetric: XAxisMetric;
   priceMetric: PriceMetric;
   weighting: CapacityWeighting;
   granularity: GranularityLevel;
@@ -25,7 +26,7 @@ const tooltipStyles: React.CSSProperties = {
   borderRadius: 4,
 };
 
-export function ScatterTooltip({ data, priceMetric, weighting, granularity, top, left }: Props) {
+export function ScatterTooltip({ data, xMetric, priceMetric, weighting, granularity, top, left }: Props) {
   const showElcc = weighting === "elcc" && data.capacity_additions_elcc_mw != null;
   const isStateView = granularity === "state";
 
@@ -99,6 +100,13 @@ export function ScatterTooltip({ data, priceMetric, weighting, granularity, top,
             <tr>
               <td colSpan={2} style={{ color: "#999", fontSize: 10.5, fontStyle: "italic", paddingTop: 2 }}>
                 * ISO-level estimate — state-level data not available
+              </td>
+            </tr>
+          )}
+          {data.id === "ERCOT" && xMetric === "queue" && !isStateView && (
+            <tr>
+              <td colSpan={2} style={{ color: "#e65100", fontSize: 10.5, fontStyle: "italic", paddingTop: 2 }}>
+                2018–2020 cohort — not directly comparable to 2000–2019 used by other ISOs
               </td>
             </tr>
           )}

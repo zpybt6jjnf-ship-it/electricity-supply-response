@@ -298,65 +298,6 @@ export function ElectricityScatter({ isoData, stateData }: Props) {
             );
           })}
 
-          {/* Queue cohort mismatch warning — ISO queue view only */}
-          {!isStateView && metric === "queue" && (
-            <g>
-              <rect
-                x={xMax - 260}
-                y={yMax - 52}
-                width={254}
-                height={44}
-                fill="#fff8e1"
-                stroke="#f9a825"
-                strokeWidth={1}
-                rx={4}
-                opacity={0.92}
-              />
-              <text
-                x={xMax - 252}
-                y={yMax - 32}
-                fontFamily={FONT.body}
-                fontSize={10}
-                fontWeight={600}
-                fill="#e65100"
-              >
-                {"⚠ Queue cohort mismatch"}
-              </text>
-              <text
-                x={xMax - 252}
-                y={yMax - 18}
-                fontFamily={FONT.body}
-                fontSize={9}
-                fill="#795548"
-              >
-                {"ERCOT uses 2018–2020; all others use 2000–2019."}
-              </text>
-            </g>
-          )}
-
-          {/* CAISO "Mandate-driven" persistent annotation — ISO view only */}
-          {!isStateView && (() => {
-            const caiso = data.find((d) => d.id === "CAISO");
-            if (!caiso) return null;
-            const cx = xScale(getXValue(caiso, metric, weighting)) ?? 0;
-            const cy = yScale(getYValue(caiso, priceMetric)) ?? 0;
-            return (
-              <text
-                x={cx}
-                y={cy + rScale(caiso.peak_demand_gw) + 14}
-                textAnchor="middle"
-                fontFamily={FONT.title}
-                fontSize={9.5}
-                fontStyle="italic"
-                fill="#8073ac"
-                opacity={0.65}
-                style={{ pointerEvents: "none" }}
-              >
-                Mandate-driven
-              </text>
-            );
-          })()}
-
           {/* Axes */}
           <AxisBottom
             top={yMax}
@@ -462,6 +403,7 @@ export function ElectricityScatter({ isoData, stateData }: Props) {
       {tooltipOpen && tooltipData && (
         <ScatterTooltip
           data={tooltipData}
+          xMetric={metric}
           priceMetric={priceMetric}
           weighting={weighting}
           granularity={granularity}
