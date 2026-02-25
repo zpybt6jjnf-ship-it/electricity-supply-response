@@ -353,7 +353,7 @@ export function ElectricityScatter({ data }: Props) {
               color: "#555",
             }}
           >
-            Bottlenecks Labs
+            Bottlenecks Lab
           </span>
           <span
             style={{
