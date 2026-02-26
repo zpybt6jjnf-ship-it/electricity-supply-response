@@ -69,7 +69,7 @@ export function ElectricityScatter({ isoData, stateData }: Props) {
   const isMid = width >= 480 && width < MAX_WIDTH;
 
   const margin = useMemo(() => {
-    if (isCompact) return { top: 48, right: 16, bottom: 72, left: 52 };
+    if (isCompact) return { top: 48, right: 16, bottom: 72, left: 62 };
     if (isMid) return { top: 52, right: 30, bottom: 80, left: 64 };
     return { top: 60, right: 50, bottom: 88, left: 82 };
   }, [isCompact, isMid]);
@@ -363,27 +363,27 @@ export function ElectricityScatter({ isoData, stateData }: Props) {
               metric === "queue" ? `${v}%` : String(v)
             }
           />
-          {/* Queue cohort footnote below x-axis */}
-          {metric === "queue" && !isStateView && (
+          {/* Queue cohort footnote below x-axis — desktop only, compact moves to data source line */}
+          {!isCompact && metric === "queue" && !isStateView && (
             <text
               x={xMax / 2}
               y={yMax + 68}
               textAnchor="middle"
               fontFamily={FONT.body}
-              fontSize={isCompact ? 8 : 9.5}
+              fontSize={9.5}
               fontStyle="italic"
               fill="#999"
             >
               * ERCOT: 2018–2020 cohort (Brattle/AEU); all others: 2000–2019 (LBNL Queued Up)
             </text>
           )}
-          {metric === "queue" && isStateView && (
+          {!isCompact && metric === "queue" && isStateView && (
             <text
               x={xMax / 2}
               y={yMax + 68}
               textAnchor="middle"
               fontFamily={FONT.body}
-              fontSize={isCompact ? 8 : 9.5}
+              fontSize={9.5}
               fontStyle="italic"
               fill="#999"
             >
@@ -403,7 +403,7 @@ export function ElectricityScatter({ isoData, stateData }: Props) {
             })}
             labelProps={{
               ...AXIS_STYLE.labelProps,
-              dx: -28,
+              dx: isCompact ? -14 : -28,
             }}
             tickFormat={(v) => isStateView ? `${v}¢` : `$${v}`}
           />
@@ -461,15 +461,44 @@ export function ElectricityScatter({ isoData, stateData }: Props) {
         />
       )}
 
-      {/* Footer — attribution + toolbar */}
+      {/* Footer — data source + toolbar + attribution */}
       <div
         style={{
           maxWidth: width,
           paddingLeft: margin.left,
           paddingRight: margin.right,
-          marginTop: isCompact ? 0 : -20,
+          marginTop: isCompact ? -4 : -20,
         }}
       >
+        {/* Data source + toolbar row */}
+        <div
+          style={{
+            display: "flex",
+            alignItems: "baseline",
+            flexWrap: "wrap",
+            gap: isCompact ? 4 : 6,
+            marginBottom: 6,
+          }}
+        >
+          <span
+            style={{
+              fontFamily: FONT.body,
+              fontSize: 9,
+              color: "#aaa",
+              flex: isCompact ? "1 1 100%" : undefined,
+            }}
+          >
+            Data: EIA, ISO Market Monitor Reports, LBNL Queued Up 2025
+            {isCompact && metric === "queue" && !isStateView &&
+              " (ERCOT: 2018–20 cohort via Brattle; others: 2000–19 via LBNL)"}
+            {isCompact && metric === "queue" && isStateView &&
+              " (queue rates are ISO-level estimates)"}
+          </span>
+          <div style={{ marginLeft: isCompact ? undefined : "auto" }}>
+            <ChartToolbar svgRef={svgRef} width={width} height={height} />
+          </div>
+        </div>
+
         {/* Attribution row */}
         <div
           style={{
@@ -477,7 +506,6 @@ export function ElectricityScatter({ isoData, stateData }: Props) {
             alignItems: "center",
             gap: 6,
             marginBottom: 6,
-            flexWrap: "wrap",
           }}
         >
           {/* Logo mark */}
@@ -509,21 +537,6 @@ export function ElectricityScatter({ isoData, stateData }: Props) {
           >
             Bottlenecks Lab
           </span>
-          <span
-            style={{
-              fontFamily: FONT.body,
-              fontSize: 9,
-              color: "#aaa",
-              marginLeft: "auto",
-            }}
-          >
-            Data: EIA, ISO Market Monitor Reports, LBNL Queued Up 2025
-          </span>
-        </div>
-
-        {/* Toolbar row */}
-        <div style={{ display: "flex", justifyContent: "flex-end" }}>
-          <ChartToolbar svgRef={svgRef} width={width} height={height} />
         </div>
       </div>
 
