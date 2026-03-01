@@ -8,6 +8,8 @@ export type PriceMetric = "energy" | "all_in";
 
 export type CapacityWeighting = "nameplate" | "elcc";
 
+export type CapacityBasis = "gross" | "net";
+
 export type ViewTab = "capacity" | "queue" | "state";
 
 export interface ISODataPoint {
@@ -47,6 +49,13 @@ export interface ISOScatterDataset {
     notes: string;
   };
   isos: ISODataPoint[];
+}
+
+/** Net capacity additions (gross minus retirements), falls back to gross */
+export function netCapacity(d: ISODataPoint): number {
+  return d.retirements_mw != null
+    ? d.capacity_additions_mw - d.retirements_mw
+    : d.capacity_additions_mw;
 }
 
 /** Derived metric: MW of new capacity per GW of system peak */

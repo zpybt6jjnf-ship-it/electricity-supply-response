@@ -1,7 +1,7 @@
 import { defaultStyles, TooltipWithBounds } from "@visx/tooltip";
-import type { ISODataPoint, XAxisMetric, PriceMetric, CapacityWeighting, GranularityLevel } from "../lib/types";
+import type { ISODataPoint, XAxisMetric, PriceMetric, CapacityWeighting, CapacityBasis, GranularityLevel } from "../lib/types";
 import type { YearKey } from "../App";
-import { capacityPerGwPeak, capacityPerGwPeakElcc } from "../lib/types";
+import { capacityPerGwPeak, capacityPerGwPeakElcc, netCapacity } from "../lib/types";
 import { FONT } from "../lib/theme";
 import { ISO_FILLS } from "../lib/colors";
 
@@ -10,6 +10,7 @@ interface Props {
   xMetric: XAxisMetric;
   priceMetric: PriceMetric;
   weighting: CapacityWeighting;
+  basis?: CapacityBasis;
   granularity: GranularityLevel;
   year: YearKey;
   top: number;
@@ -28,7 +29,7 @@ const tooltipStyles: React.CSSProperties = {
   borderRadius: 4,
 };
 
-export function ScatterTooltip({ data, xMetric, priceMetric, weighting, granularity, year, top, left }: Props) {
+export function ScatterTooltip({ data, xMetric, priceMetric, weighting, basis, granularity, year, top, left }: Props) {
   const showElcc = weighting === "elcc" && data.capacity_additions_elcc_mw != null;
   const isStateView = granularity === "state";
   const isEst = data.isEstimate === true;
@@ -109,10 +110,19 @@ export function ScatterTooltip({ data, xMetric, priceMetric, weighting, granular
             />
           )}
           <Row
-            label="Per GW peak"
-            value={showElcc
-              ? `${capacityPerGwPeakElcc(data).toFixed(1)} MW/GW (ELCC)`
-              : `${capacityPerGwPeak(data).toFixed(1)} MW/GW`}
+            label={basis === "net" ? "Net per GW peak" : "Per GW peak"}
+            value={(() => {
+              if (basis === "net") {
+                const net = showElcc
+                  ? (data.capacity_additions_elcc_mw ?? data.capacity_additions_mw) - (data.retirements_mw ?? 0)
+                  : netCapacity(data);
+                return `${(net / data.peak_demand_gw).toFixed(1)} MW/GW${showElcc ? " (ELCC)" : ""}`;
+              }
+              return showElcc
+                ? `${capacityPerGwPeakElcc(data).toFixed(1)} MW/GW (ELCC)`
+                : `${capacityPerGwPeak(data).toFixed(1)} MW/GW`;
+            })()}
+            highlight={basis === "net"}
           />
           <Row label="Projects" value={`${data.project_count}`} />
           <Row label="Peak demand" value={`${data.peak_demand_gw.toFixed(1)} GW`} />

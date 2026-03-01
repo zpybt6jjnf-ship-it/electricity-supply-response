@@ -1,6 +1,6 @@
-import type { ISODataPoint, XAxisMetric, PriceMetric, CapacityWeighting, GranularityLevel } from "../lib/types";
+import type { ISODataPoint, XAxisMetric, PriceMetric, CapacityWeighting, CapacityBasis, GranularityLevel } from "../lib/types";
 import type { YearKey } from "../App";
-import { capacityPerGwPeak, capacityPerGwPeakElcc } from "../lib/types";
+import { capacityPerGwPeak, capacityPerGwPeakElcc, netCapacity } from "../lib/types";
 import { SR_ONLY } from "../lib/theme";
 
 interface Props {
@@ -8,11 +8,12 @@ interface Props {
   metric: XAxisMetric;
   priceMetric: PriceMetric;
   weighting: CapacityWeighting;
+  basis?: CapacityBasis;
   granularity: GranularityLevel;
   year: YearKey;
 }
 
-export function HiddenDataTable({ data, metric: _metric, priceMetric: _priceMetric, weighting, granularity, year }: Props) {
+export function HiddenDataTable({ data, metric: _metric, priceMetric: _priceMetric, weighting, basis, granularity, year }: Props) {
   const isStateView = granularity === "state";
   const showElcc = weighting === "elcc";
 
@@ -33,7 +34,7 @@ export function HiddenDataTable({ data, metric: _metric, priceMetric: _priceMetr
             <th>New Capacity</th>
             {data.some((d) => d.retirements_mw != null) && <th>Retirements</th>}
             {data.some((d) => d.retirements_mw != null) && <th>Net Additions</th>}
-            <th>Capacity/GW Peak</th>
+            <th>{basis === "net" ? "Net Capacity/GW Peak" : "Capacity/GW Peak"}</th>
             <th>Projects</th>
             <th>Peak Demand</th>
             <th>Queue Completion</th>
@@ -41,7 +42,11 @@ export function HiddenDataTable({ data, metric: _metric, priceMetric: _priceMetr
         </thead>
         <tbody>
           {data.map((d) => {
-            const perGw = showElcc ? capacityPerGwPeakElcc(d) : capacityPerGwPeak(d);
+            const perGw = basis === "net"
+              ? (showElcc
+                  ? ((d.capacity_additions_elcc_mw ?? d.capacity_additions_mw) - (d.retirements_mw ?? 0)) / d.peak_demand_gw
+                  : netCapacity(d) / d.peak_demand_gw)
+              : (showElcc ? capacityPerGwPeakElcc(d) : capacityPerGwPeak(d));
             const hasRetirements = d.retirements_mw != null;
             return (
               <tr key={d.id}>

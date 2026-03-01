@@ -3,7 +3,7 @@ import { Group } from "@visx/group";
 import { AxisBottom, AxisLeft } from "@visx/axis";
 import { GridRows, GridColumns } from "@visx/grid";
 import { useTooltip } from "@visx/tooltip";
-import type { ISODataPoint, XAxisMetric, PriceMetric, CapacityWeighting, GranularityLevel, ViewTab } from "../lib/types";
+import type { ISODataPoint, XAxisMetric, PriceMetric, CapacityWeighting, CapacityBasis, GranularityLevel, ViewTab } from "../lib/types";
 import type { YearKey } from "../App";
 import { createScales, getXValue, getXLabel, getXSubtitle, getYValue, getYLabel } from "../lib/scales";
 import { ISO_FILLS, ISO_STROKES } from "../lib/colors";
@@ -91,6 +91,7 @@ export function ElectricityScatter({
   const [viewTab, setViewTab] = useState<ViewTab>("capacity");
   const [priceMetric, setPriceMetric] = useState<PriceMetric>("all_in");
   const [weighting, setWeighting] = useState<CapacityWeighting>("nameplate");
+  const [basis, setBasis] = useState<CapacityBasis>("gross");
   const [tappedId, setTappedId] = useState<string | null>(null);
   const [playing, setPlaying] = useState(false);
   const svgRef = useRef<SVGSVGElement>(null);
@@ -186,6 +187,7 @@ export function ElectricityScatter({
     granularity,
     rRangeOverride,
     domainData,
+    basis,
   );
 
   const handleMouseEnter = useCallback(
@@ -313,7 +315,7 @@ export function ElectricityScatter({
             margin: "2px 0 0",
           }}
         >
-          {getXSubtitle(metric, weighting)}, {year}{year === "2025" ? " (est.)" : ""}
+          {getXSubtitle(metric, weighting, basis)}, {year}{year === "2025" ? " (est.)" : ""}
           {isStateView && (
             <span style={{ color: "#767676", marginLeft: 8, fontSize: isCompact ? 9 : 11 }}>
               State retail prices from EIA ({year} avg, all sectors)
@@ -329,12 +331,14 @@ export function ElectricityScatter({
           viewTab={viewTab}
           priceMetric={priceMetric}
           weighting={weighting}
+          basis={basis}
           year={year}
           availableYears={activeYears}
           playing={playing}
           onViewTabChange={handleViewTabChange}
           onPriceMetricChange={setPriceMetric}
           onWeightingChange={setWeighting}
+          onBasisChange={setBasis}
           onYearChange={handleYearChange}
           onPlayToggle={handlePlayToggle}
         />
@@ -400,7 +404,7 @@ export function ElectricityScatter({
           {!isStateView && isoUnion.map((baseD) => {
             const isActive = currentIds.has(baseD.id);
             const d = isoData.find((curr) => curr.id === baseD.id) ?? baseD;
-            const cx = xScale(getXValue(d, metric, weighting)) ?? 0;
+            const cx = xScale(getXValue(d, metric, weighting, basis)) ?? 0;
             const cy = yScale(getYValue(d, priceMetric, granularity)) ?? 0;
             const r = rScale(d.peak_demand_gw);
             const isEst = d.isEstimate === true;
@@ -475,7 +479,7 @@ export function ElectricityScatter({
           {isStateView && stateUnion.map((baseD) => {
             const isActive = currentStateIds.has(baseD.id);
             const d = stateData.find((curr) => curr.id === baseD.id) ?? baseD;
-            const cx = xScale(getXValue(d, metric, weighting)) ?? 0;
+            const cx = xScale(getXValue(d, metric, weighting, basis)) ?? 0;
             const cy = yScale(getYValue(d, priceMetric, granularity)) ?? 0;
             const r = rScale(d.peak_demand_gw);
             const isEst = d.isEstimate === true;
@@ -532,7 +536,7 @@ export function ElectricityScatter({
           <AxisBottom
             top={yMax}
             scale={xScale}
-            label={getXLabel(metric, weighting)}
+            label={getXLabel(metric, weighting, basis)}
             stroke={AXIS_STYLE.strokeColor}
             tickStroke={AXIS_STYLE.tickStroke}
             tickLabelProps={() => AXIS_STYLE.tickLabelProps}
@@ -722,6 +726,7 @@ export function ElectricityScatter({
         metric={metric}
         priceMetric={priceMetric}
         weighting={weighting}
+        basis={basis}
         granularity={granularity}
         year={year}
       />
@@ -733,6 +738,7 @@ export function ElectricityScatter({
           xMetric={metric}
           priceMetric={priceMetric}
           weighting={weighting}
+          basis={basis}
           granularity={granularity}
           year={year}
           top={tooltipTop ?? 0}

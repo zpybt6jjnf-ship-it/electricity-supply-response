@@ -103,7 +103,11 @@ Generators reaching commercial operation, from EIA-860M January 2026 vintage:
 
 **Notable 2023 → 2024 changes:** PJM dropped from 7,910 to 4,079 MW (loss of gas CC cycle); ERCOT nearly doubled from 7,757 to 13,973 MW (solar/battery boom).
 
-**Gross vs. net capacity:** All capacity figures are gross nameplate additions, not net of retirements. Gross figures overstate net additions, especially for MISO and ISO-NE. Material 2024 retirements: MISO ~1.8 GW coal (South Oak Creek, Rush Island); ISO-NE 1.4 GW (Mystic CC, June 2024); PJM ~0.2 GW (Warrior Run coal/cogen, June 2024).
+**Gross vs. net capacity:** The chart supports a gross/net capacity toggle. Retirement data is sourced from the same EIA-860M January 2026 vintage (Retired sheet), grouped by Balancing Authority code. Key net additions by year:
+
+- **2023:** PJM gross 7,910 but net only +901 MW (7,009 MW retired). MISO net +1,243 MW (3,635 retired). ISO-NE net +126 MW.
+- **2024:** ISO-NE net **−1,412 MW** (1,937 retired vs 525 added). MISO net +2,776 MW (4,380 retired). PJM net +2,509 MW.
+- **2025 (est.):** PJM net +2,956 MW (1,044 retired). All others: retirements modest relative to additions.
 
 ### ELCC-Weighted Capacity
 
@@ -309,7 +313,7 @@ State-level data supports 2023, 2024, and 2025 (estimated). All 2025 state rows 
 
 5. **Nameplate vs. effective capacity**: Using nameplate MW overstates variable resources (solar, wind) relative to firm capacity. The ELCC toggle provides estimated effective capacity for comparison.
 
-6. **Gross vs. net capacity**: All capacity figures are gross nameplate additions, not net of retirements. Gross figures overstate net additions, especially for MISO and ISO-NE. Specific 2024 retirements: MISO ~1.8 GW coal (South Oak Creek, Rush Island); ISO-NE 1.4 GW (Mystic CC, June 2024); PJM ~0.2 GW (Warrior Run coal/cogen, June 2024).
+6. **Gross vs. net capacity**: The chart provides a gross/net toggle. Retirement data is from EIA-860M (Retired sheet, same vintage as additions). Net additions can be negative — ISO-NE 2024 retired 1,937 MW against only 525 MW added (net −1,412 MW). PJM 2023 retired 7,009 MW (net only +901 MW from 7,910 gross). Default view shows gross to maintain comparability with prior publications.
 
 7. **ERCOT peak demand**: 85.2 GW (settled data, Aug 20, 2024). The preliminary real-time value of 85.6 GW was revised down. This is slightly below the 2023 record of 85.5 GW — not an all-time record.
 
@@ -356,7 +360,7 @@ All corrections bias toward making the functional-vs-broken gap **more accuratel
 | ELCC documentation | Generic factors implied | ISO-specific factors documented | MISO solar 50%, SPP wind per SPP study — data values unchanged |
 | Vineyard Wind | Not flagged | Blade failure noted | 136 MW shut down ~6 months in 2024; operational contribution severely limited |
 | CAISO solar | 3 GW stated | Undercount flagged | EIA projected ~4.8 GW; 3 GW is conservative pending EIA-860M confirmation |
-| Gross/net retirements | Generic mention | Specific plants listed | MISO 1.8 GW, ISO-NE 1.4 GW, PJM 0.6 GW — material for net capacity |
+| Gross/net retirements | Generic mention | Full EIA-860M retirement data + toggle | All ISOs/states/years from EIA-860M Retired sheet. Gross/net toggle on chart. ISO-NE 2024 net −1,412 MW; PJM 2023 net +901 MW |
 | Thesis framing | "root cause" | "key structural factor" | Acknowledges fuel mix, pipeline, carbon policy as co-factors |
 | DA/RT mixing | ~$2–5/MWh uncertainty | ~$2–3/MWh, standardization note added | Tighter estimate; explains why mixing was not resolved |
 | Counterexamples | None | Section added | SPP, CAISO, ISO-NE, ERCOT cases where thesis is incomplete |
