@@ -6,7 +6,7 @@ import { useTooltip } from "@visx/tooltip";
 import type { ISODataPoint, XAxisMetric, PriceMetric, CapacityWeighting, GranularityLevel, ViewTab } from "../lib/types";
 import type { YearKey } from "../App";
 import { createScales, getXValue, getXLabel, getXSubtitle, getYValue, getYLabel } from "../lib/scales";
-import { GROUP_FILLS, GROUP_STROKES, ISO_FILLS, ISO_STROKES } from "../lib/colors";
+import { ISO_FILLS, ISO_STROKES } from "../lib/colors";
 import { FONT, AXIS_STYLE, GRID_STYLE } from "../lib/theme";
 import { ScatterTooltip } from "./ScatterTooltip";
 import { ChartControls } from "./ChartControls";
@@ -405,9 +405,9 @@ export function ElectricityScatter({
               >
                 <circle
                   r={r}
-                  fill={GROUP_FILLS[d.color_group]}
+                  fill={ISO_FILLS[d.id] ?? "#999"}
                   fillOpacity={isEst ? 0.20 : 0.55}
-                  stroke={GROUP_STROKES[d.color_group]}
+                  stroke={ISO_STROKES[d.id] ?? "#666"}
                   strokeWidth={isEst ? 2 : 1.5}
                   strokeDasharray={isEst ? "4,3" : undefined}
                   style={{ cursor: "pointer", transition: "r 0.4s ease" }}
@@ -424,7 +424,7 @@ export function ElectricityScatter({
                     fontSize={10}
                     fontStyle="italic"
                     fontWeight={600}
-                    fill={GROUP_STROKES[d.color_group]}
+                    fill={ISO_STROKES[d.id] ?? "#666"}
                     opacity={0.7}
                     style={{ pointerEvents: "none" }}
                   >
@@ -439,7 +439,7 @@ export function ElectricityScatter({
                     fontFamily={FONT.body}
                     fontSize={12}
                     fontWeight={600}
-                    fill={GROUP_STROKES[d.color_group]}
+                    fill={ISO_STROKES[d.id] ?? "#666"}
                     style={{ pointerEvents: "none" }}
                   >
                     {d.id}
@@ -652,8 +652,7 @@ export function ElectricityScatter({
 
         {/* Color legend — hidden on compact */}
         {!isCompact && (() => {
-          const colorLegendItems = isStateView
-            ? [
+          const colorLegendItems = [
                 { label: "ERCOT", fill: ISO_FILLS.ERCOT, stroke: ISO_STROKES.ERCOT },
                 { label: "MISO", fill: ISO_FILLS.MISO, stroke: ISO_STROKES.MISO },
                 { label: "SPP", fill: ISO_FILLS.SPP, stroke: ISO_STROKES.SPP },
@@ -661,11 +660,6 @@ export function ElectricityScatter({
                 { label: "CAISO", fill: ISO_FILLS.CAISO, stroke: ISO_STROKES.CAISO },
                 { label: "NYISO", fill: ISO_FILLS.NYISO, stroke: ISO_STROKES.NYISO },
                 { label: "ISO-NE", fill: ISO_FILLS["ISO-NE"], stroke: ISO_STROKES["ISO-NE"] },
-              ]
-            : [
-                { label: "Functional", fill: GROUP_FILLS.functional, stroke: GROUP_STROKES.functional },
-                { label: "Intermediate", fill: GROUP_FILLS.intermediate, stroke: GROUP_STROKES.intermediate },
-                { label: "Broken", fill: GROUP_FILLS.broken, stroke: GROUP_STROKES.broken },
               ];
           let cx = 0;
           return (
