@@ -155,9 +155,13 @@ export function ElectricityScatter({
       return;
     }
     const isLast = idx >= activeYears.length - 1;
+    // State view has 30+ bubbles — give more time to settle
+    const delay = isStateView
+      ? (isLast ? 5000 : 4500)
+      : (isLast ? 3000 : 2800);
     const timer = setTimeout(() => {
       onYearChange(activeYears[isLast ? 0 : idx + 1]);
-    }, isLast ? 3000 : 2800);
+    }, delay);
     return () => clearTimeout(timer);
   }, [playing, year, activeYears, onYearChange]);
 
