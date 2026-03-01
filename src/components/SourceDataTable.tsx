@@ -1,5 +1,5 @@
 import { useState, useCallback, useMemo } from "react";
-import { FONT } from "../lib/theme";
+import { FONT, COLOR } from "../lib/theme";
 import csvRaw from "../../data/audit_all_data.csv?raw";
 
 /** Columns to display in the audit table (order matters). */
@@ -138,7 +138,7 @@ export function SourceDataTable() {
   const handleToggle = useCallback(() => setOpen((v) => !v), []);
 
   return (
-    <div style={{ marginTop: 12 }}>
+    <div>
       <button
         onClick={handleToggle}
         style={{
@@ -146,16 +146,19 @@ export function SourceDataTable() {
           border: "none",
           cursor: "pointer",
           padding: 0,
-          fontFamily: FONT.title,
-          fontSize: 13,
-          fontWeight: 600,
-          color: "#767676",
+          fontFamily: FONT.body,
+          fontSize: 11,
+          fontWeight: 500,
+          color: COLOR.text.secondary,
           display: "flex",
           alignItems: "center",
-          gap: 4,
+          gap: 6,
+          transition: "color 0.15s ease",
         }}
+        onMouseEnter={(e) => (e.currentTarget.style.color = COLOR.text.primary)}
+        onMouseLeave={(e) => (e.currentTarget.style.color = COLOR.text.secondary)}
       >
-        <span style={{ fontSize: 10 }}>{open ? "\u25BE" : "\u25B8"}</span>
+        <span style={{ fontSize: 9, color: COLOR.text.muted, width: 8, textAlign: "center" }}>{open ? "▼" : "▶"}</span>
         Source Data
       </button>
 
@@ -163,11 +166,12 @@ export function SourceDataTable() {
         <div
           style={{
             marginTop: 8,
+            marginBottom: 12,
             overflowX: "auto",
             maxHeight: 480,
             overflowY: "auto",
-            border: "1px solid #e0e0e0",
-            borderRadius: 4,
+            border: "1px solid " + COLOR.border.light,
+            borderRadius: 8,
           }}
         >
           <table
@@ -186,12 +190,12 @@ export function SourceDataTable() {
                     style={{
                       position: "sticky",
                       top: 0,
-                      background: "#f5f5f5",
-                      borderBottom: "2px solid #ccc",
-                      padding: "6px 10px",
+                      background: COLOR.surface.muted,
+                      borderBottom: "2px solid " + COLOR.border.default,
+                      padding: "8px 10px",
                       textAlign: NUMERIC_COLS.has(col) ? "right" : "left",
                       fontWeight: 600,
-                      color: "#333",
+                      color: COLOR.text.secondary,
                       zIndex: 1,
                     }}
                   >
@@ -205,7 +209,7 @@ export function SourceDataTable() {
                 <tr
                   key={ri}
                   style={{
-                    background: ri % 2 === 0 ? "#fff" : "#fafafa",
+                    background: ri % 2 === 0 ? "#fff" : COLOR.surface.subtle,
                   }}
                 >
                   {DISPLAY_COLUMNS.map((col) => {
@@ -217,10 +221,10 @@ export function SourceDataTable() {
                         key={col}
                         title={isSourceCol ? val : undefined}
                         style={{
-                          borderBottom: "1px solid #eee",
-                          padding: "4px 10px",
+                          borderBottom: "1px solid " + COLOR.border.light,
+                          padding: "5px 10px",
                           textAlign: NUMERIC_COLS.has(col) ? "right" : "left",
-                          color: "#555",
+                          color: COLOR.text.tertiary,
                           maxWidth: isSourceCol ? 280 : undefined,
                           overflow: isSourceCol ? "hidden" : undefined,
                           textOverflow: isSourceCol ? "ellipsis" : undefined,

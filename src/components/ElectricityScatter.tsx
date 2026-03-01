@@ -27,31 +27,31 @@ type ViewKey = "queue" | "capacity" | "capacity_elcc";
 
 const LABEL_OFFSETS: Record<string, Record<string, Record<ViewKey, [number, number]>>> = {
   "2024": {
-    ERCOT:    { capacity: [15, -30],  capacity_elcc: [15, -30],  queue: [15, -22] },
-    SPP:      { capacity: [15, -18],  capacity_elcc: [15, -18],  queue: [15, -18] },
-    MISO:     { capacity: [15, -10],  capacity_elcc: [15, -10],  queue: [15, 8] },
-    CAISO:    { capacity: [-55, -20], capacity_elcc: [-55, -20], queue: [-55, -15] },
-    PJM:      { capacity: [58, -15],  capacity_elcc: [15, -22],  queue: [30, -55] },
-    NYISO:    { capacity: [15, -22],  capacity_elcc: [15, -22],  queue: [-52, -10] },
+    ERCOT: { capacity: [15, -30], capacity_elcc: [15, -30], queue: [15, -22] },
+    SPP: { capacity: [15, -18], capacity_elcc: [15, -18], queue: [15, -18] },
+    MISO: { capacity: [15, -10], capacity_elcc: [15, -10], queue: [15, 8] },
+    CAISO: { capacity: [-55, -20], capacity_elcc: [-55, -20], queue: [-55, -15] },
+    PJM: { capacity: [58, -15], capacity_elcc: [15, -22], queue: [30, -55] },
+    NYISO: { capacity: [15, -22], capacity_elcc: [15, -22], queue: [-52, -10] },
     "ISO-NE": { capacity: [-15, -18], capacity_elcc: [-15, -18], queue: [-52, 8] },
   },
   "2023": {
-    ERCOT:    { capacity: [15, -30],  capacity_elcc: [15, -30],  queue: [15, -22] },
-    SPP:      { capacity: [15, -18],  capacity_elcc: [15, -18],  queue: [15, -18] },
-    MISO:     { capacity: [15, -10],  capacity_elcc: [15, -10],  queue: [15, 8] },
-    CAISO:    { capacity: [-55, -20], capacity_elcc: [-55, -20], queue: [-55, -15] },
-    PJM:      { capacity: [-65, -15], capacity_elcc: [15, -22],  queue: [30, -55] },
-    NYISO:    { capacity: [15, -22],  capacity_elcc: [15, -22],  queue: [-52, -10] },
+    ERCOT: { capacity: [15, -30], capacity_elcc: [15, -30], queue: [15, -22] },
+    SPP: { capacity: [15, -18], capacity_elcc: [15, -18], queue: [15, -18] },
+    MISO: { capacity: [15, -10], capacity_elcc: [15, -10], queue: [15, 8] },
+    CAISO: { capacity: [-55, -20], capacity_elcc: [-55, -20], queue: [-55, -15] },
+    PJM: { capacity: [-65, -15], capacity_elcc: [15, -22], queue: [30, -55] },
+    NYISO: { capacity: [15, -22], capacity_elcc: [15, -22], queue: [-52, -10] },
     "ISO-NE": { capacity: [-15, -18], capacity_elcc: [-15, -18], queue: [-52, 8] },
   },
   "2025": {
-    ERCOT:    { capacity: [15, -30],  capacity_elcc: [15, -30],  queue: [15, -22] },
-    SPP:      { capacity: [15, -18],  capacity_elcc: [15, -18],  queue: [15, -18] },
-    MISO:     { capacity: [15, -10],  capacity_elcc: [15, -10],  queue: [15, 8] },
-    CAISO:    { capacity: [-55, -20], capacity_elcc: [-55, -20], queue: [-55, -15] },
-    PJM:      { capacity: [15, -22],  capacity_elcc: [15, -22],  queue: [15, -22] },
-    NYISO:    { capacity: [20, -35],  capacity_elcc: [20, -35],  queue: [-52, -18] },
-    "ISO-NE": { capacity: [-55, -5],  capacity_elcc: [-55, -5],  queue: [-52, 15] },
+    ERCOT: { capacity: [15, -30], capacity_elcc: [15, -30], queue: [15, -22] },
+    SPP: { capacity: [15, -18], capacity_elcc: [15, -18], queue: [15, -18] },
+    MISO: { capacity: [15, -10], capacity_elcc: [15, -10], queue: [15, 8] },
+    CAISO: { capacity: [-55, -20], capacity_elcc: [-55, -20], queue: [-55, -15] },
+    PJM: { capacity: [15, -22], capacity_elcc: [15, -22], queue: [15, -22] },
+    NYISO: { capacity: [20, -35], capacity_elcc: [20, -35], queue: [-52, -18] },
+    "ISO-NE": { capacity: [-55, -5], capacity_elcc: [-55, -5], queue: [-52, 15] },
   },
 };
 
@@ -62,12 +62,12 @@ function getViewKey(metric: XAxisMetric, weighting: CapacityWeighting): ViewKey 
 
 /** ISO color mapping for horizontal band labels — matches ISO_STROKES */
 const ISO_BAND_COLORS: Record<string, string> = {
-  ERCOT:    "#2166ac",
-  MISO:     "#1b9e77",
-  SPP:      "#d95f02",
-  CAISO:    "#c51b7d",
-  PJM:      "#5e4fa2",
-  NYISO:    "#4d9221",
+  ERCOT: "#2166ac",
+  MISO: "#1b9e77",
+  SPP: "#d95f02",
+  CAISO: "#c51b7d",
+  PJM: "#5e4fa2",
+  NYISO: "#4d9221",
   "ISO-NE": "#b8860b",
 };
 
@@ -301,11 +301,12 @@ export function ElectricityScatter({
         <h2
           style={{
             fontFamily: FONT.title,
-            fontSize: isCompact ? 15 : 19,
-            fontWeight: 700,
+            fontSize: isCompact ? 16 : 20,
+            fontWeight: 800,
             color: COLOR.text.primary,
             margin: 0,
             lineHeight: 1.3,
+            letterSpacing: "-0.02em",
           }}
         >
           {title}
@@ -328,7 +329,17 @@ export function ElectricityScatter({
       </div>
 
       {/* Controls */}
-      <div style={{ marginBottom: 4, paddingLeft: margin.left }}>
+      <div style={{
+        marginBottom: 8,
+        paddingLeft: isCompact ? 8 : 16,
+        paddingRight: isCompact ? 8 : 16,
+        paddingTop: isCompact ? 8 : 12,
+        paddingBottom: isCompact ? 8 : 12,
+        marginLeft: isCompact ? 4 : margin.left - 16,
+        marginRight: isCompact ? 4 : 0,
+        background: COLOR.surface.muted,
+        borderRadius: isCompact ? 8 : 12,
+      }}>
         <ChartControls
           compact={isCompact}
           viewTab={viewTab}
@@ -373,13 +384,13 @@ export function ElectricityScatter({
             scale={yScale}
             width={xMax}
             stroke={GRID_STYLE.stroke}
-            strokeDasharray={GRID_STYLE.strokeDasharray}
+            strokeWidth={GRID_STYLE.strokeWidth}
           />
           <GridColumns
             scale={xScale}
             height={yMax}
             stroke={GRID_STYLE.stroke}
-            strokeDasharray={GRID_STYLE.strokeDasharray}
+            strokeWidth={GRID_STYLE.strokeWidth}
           />
 
           {/* Horizontal ISO price bands — state view only */}
@@ -435,7 +446,7 @@ export function ElectricityScatter({
                 onBlur={() => hideTooltip()}
                 style={{
                   transform: `translate(${cx}px, ${cy}px)`,
-                  transition: "transform 1.8s ease-in-out, opacity 1s ease",
+                  transition: `transform 1.8s ease-in-out, opacity 1s ease`,
                   opacity: isActive ? 1 : 0,
                   pointerEvents: isActive ? "auto" : "none",
                 }}
@@ -522,7 +533,7 @@ export function ElectricityScatter({
                 onBlur={() => hideTooltip()}
                 style={{
                   transform: `translate(${cx}px, ${cy}px)`,
-                  transition: "transform 1.8s ease-in-out, opacity 1s ease",
+                  transition: `transform 1.8s ease-in-out, opacity 1s ease`,
                   opacity: isActive ? 1 : 0,
                   pointerEvents: isActive ? "auto" : "none",
                 }}
@@ -711,14 +722,14 @@ export function ElectricityScatter({
         {/* SVG Color legend — desktop only */}
         {!isCompact && (() => {
           const colorLegendItems = [
-                { label: "ERCOT", fill: ISO_FILLS.ERCOT, stroke: ISO_STROKES.ERCOT },
-                { label: "MISO", fill: ISO_FILLS.MISO, stroke: ISO_STROKES.MISO },
-                { label: "SPP", fill: ISO_FILLS.SPP, stroke: ISO_STROKES.SPP },
-                { label: "PJM", fill: ISO_FILLS.PJM, stroke: ISO_STROKES.PJM },
-                { label: "CAISO", fill: ISO_FILLS.CAISO, stroke: ISO_STROKES.CAISO },
-                { label: "NYISO", fill: ISO_FILLS.NYISO, stroke: ISO_STROKES.NYISO },
-                { label: "ISO-NE", fill: ISO_FILLS["ISO-NE"], stroke: ISO_STROKES["ISO-NE"] },
-              ];
+            { label: "ERCOT", fill: ISO_FILLS.ERCOT, stroke: ISO_STROKES.ERCOT },
+            { label: "MISO", fill: ISO_FILLS.MISO, stroke: ISO_STROKES.MISO },
+            { label: "SPP", fill: ISO_FILLS.SPP, stroke: ISO_STROKES.SPP },
+            { label: "PJM", fill: ISO_FILLS.PJM, stroke: ISO_STROKES.PJM },
+            { label: "CAISO", fill: ISO_FILLS.CAISO, stroke: ISO_STROKES.CAISO },
+            { label: "NYISO", fill: ISO_FILLS.NYISO, stroke: ISO_STROKES.NYISO },
+            { label: "ISO-NE", fill: ISO_FILLS["ISO-NE"], stroke: ISO_STROKES["ISO-NE"] },
+          ];
           let cx = 0;
           return (
             <Group top={height - 10} left={margin.left}>
@@ -828,92 +839,78 @@ export function ElectricityScatter({
         />
       )}
 
-      {/* Footer — data source, references, separator, branding + toolbar */}
+      {/* Footer — data source, branding, and toolbar */}
       <div
         style={{
           maxWidth: width,
           paddingLeft: margin.left,
           paddingRight: margin.right,
-          marginTop: 8,
+          marginTop: 12,
+          display: "flex",
+          flexDirection: isCompact ? "column" : "row",
+          justifyContent: "space-between",
+          alignItems: isCompact ? "flex-start" : "center",
+          gap: isCompact ? 16 : 8,
         }}
       >
-        {/* Data source line */}
-        <div
-          style={{
-            fontFamily: FONT.body,
-            fontSize: 10,
-            color: COLOR.text.muted,
-            marginBottom: 6,
-          }}
-        >
-          Data: EIA, ISO Market Monitor Reports, LBNL Queued Up 2025
-          {isCompact && metric === "queue" && !isStateView &&
-            " (ERCOT/MISO: 2018–20 cohort via Brattle; others: 2000–19 via LBNL)"}
-          {isCompact && metric === "queue" && isStateView &&
-            " (queue rates are ISO-level estimates)"}
-        </div>
+        {/* Left side: Notes, Data Source, Logo */}
+        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+          {/* Action links */}
+          <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+            <MethodologyNotes granularity={granularity} compact={isCompact} />
+            <SourceDataTable />
+          </div>
 
-        {/* Methodology + Source Data row */}
-        <div
-          style={{
-            display: "flex",
-            flexWrap: "wrap",
-            gap: isCompact ? 4 : 8,
-            alignItems: "baseline",
-            marginBottom: 8,
-          }}
-        >
-          <MethodologyNotes granularity={granularity} compact={isCompact} />
-          <SourceDataTable />
-        </div>
+          {/* Data string + branding */}
+          <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", opacity: 0.85 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+              <svg width={12} height={12} viewBox="0 0 14 14">
+                <defs>
+                  <linearGradient id="brandGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stopColor="#2a9d8f" />
+                    <stop offset="50%" stopColor="#e9c46a" />
+                    <stop offset="100%" stopColor="#e76f51" />
+                  </linearGradient>
+                </defs>
+                <rect width={14} height={14} fill="#1a1a2e" rx={1.5} />
+                <path
+                  d="M 0,9.8 L 1.12,8.8 L 2.52,10.5 L 3.92,7 L 5.32,8.4 L 7,4.2 L 8.68,7.7 L 10.08,6.3 L 11.48,8.4 L 12.88,7.7 L 14,9.1"
+                  stroke="url(#brandGrad)"
+                  strokeWidth={0.9}
+                  fill="none"
+                  strokeLinejoin="round"
+                />
+              </svg>
+              <span
+                style={{
+                  fontFamily: FONT.title,
+                  fontSize: 10,
+                  fontWeight: 600,
+                  letterSpacing: "0.01em",
+                  color: COLOR.text.secondary,
+                }}
+              >
+                Bottlenecks Lab
+              </span>
+            </div>
 
-        {/* Separator */}
-        <div style={{ borderTop: `1px solid ${COLOR.border.light}`, marginBottom: 8 }} />
+            <span style={{ color: COLOR.border.strong, fontSize: 10 }}>|</span>
 
-        {/* Branding + Toolbar row */}
-        <div
-          style={{
-            display: "flex",
-            flexWrap: "wrap",
-            alignItems: "center",
-            gap: 6,
-            marginBottom: 6,
-          }}
-        >
-          {/* Logo mark */}
-          <div style={{ display: "flex", alignItems: "center", gap: 6, flex: isCompact ? "1 1 100%" : undefined }}>
-            <svg width={14} height={14} viewBox="0 0 14 14">
-              <defs>
-                <linearGradient id="brandGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-                  <stop offset="0%" stopColor="#2a9d8f" />
-                  <stop offset="50%" stopColor="#e9c46a" />
-                  <stop offset="100%" stopColor="#e76f51" />
-                </linearGradient>
-              </defs>
-              <rect width={14} height={14} fill="#1a1a2e" rx={1.5} />
-              <path
-                d="M 0,9.8 L 1.12,8.8 L 2.52,10.5 L 3.92,7 L 5.32,8.4 L 7,4.2 L 8.68,7.7 L 10.08,6.3 L 11.48,8.4 L 12.88,7.7 L 14,9.1"
-                stroke="url(#brandGrad)"
-                strokeWidth={0.9}
-                fill="none"
-                strokeLinejoin="round"
-              />
-            </svg>
             <span
               style={{
-                fontFamily: FONT.brand,
+                fontFamily: FONT.body,
                 fontSize: 10,
-                fontWeight: 700,
-                letterSpacing: "0.02em",
-                color: COLOR.text.tertiary,
+                color: COLOR.text.muted,
               }}
             >
-              Bottlenecks Lab
+              Data: EIA, ISO Market Monitor Reports, LBNL Queued Up 2025
             </span>
           </div>
-          <div style={{ marginLeft: isCompact ? undefined : "auto", justifyContent: isCompact ? "center" : undefined, display: "flex" }}>
-            <ChartToolbar svgRef={svgRef} width={width} height={height} compact={isCompact} />
-          </div>
+        </div>
+
+        {/* Right side: Toolbar */}
+        <div style={{ display: "flex", width: isCompact ? "100%" : "auto", justifyContent: isCompact ? "center" : "flex-end" }}>
+          <ChartToolbar svgRef={svgRef} width={width} height={height} compact={isCompact} />
         </div>
       </div>
     </div>

@@ -26,9 +26,9 @@ function getTooltipStyles(isCompact?: boolean): React.CSSProperties {
     lineHeight: 1.5,
     padding: isCompact ? "10px 12px" : "12px 16px",
     maxWidth: "min(320px, 90vw)",
-    boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
+    boxShadow: "0 4px 12px rgba(0,0,0,0.12), 0 1px 3px rgba(0,0,0,0.06)",
     border: `1px solid ${COLOR.border.light}`,
-    borderRadius: 4,
+    borderRadius: 8,
   };
 }
 
@@ -183,7 +183,9 @@ function Row({ label, value, highlight, warning }: { label: string; value: strin
       <td style={{ color: COLOR.text.muted, paddingRight: 12, paddingBottom: 2 }}>{label}</td>
       <td
         style={{
+          fontFamily: FONT.data,
           fontWeight: 600,
+          fontSize: 11.5,
           color: warning ? COLOR.accent.error : highlight ? COLOR.text.primary : COLOR.text.secondary,
           paddingBottom: 2,
           background: warning ? `${COLOR.accent.error}0F` : highlight ? `${COLOR.accent.brand}14` : undefined,

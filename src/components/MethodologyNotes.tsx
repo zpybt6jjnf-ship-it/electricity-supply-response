@@ -35,7 +35,7 @@ export function MethodologyNotes({ granularity, compact }: Props) {
   const bodyFontSize = compact ? 12 : 11;
 
   return (
-    <div style={{ marginTop: 0 }}>
+    <div>
       <button
         onClick={() => setOpen(!open)}
         style={{
@@ -43,21 +43,24 @@ export function MethodologyNotes({ granularity, compact }: Props) {
           border: "none",
           cursor: "pointer",
           padding: 0,
-          fontFamily: FONT.title,
-          fontSize: 13,
-          fontWeight: 600,
-          color: COLOR.text.muted,
+          fontFamily: FONT.body,
+          fontSize: 11,
+          fontWeight: 500,
+          color: COLOR.text.secondary,
           display: "flex",
           alignItems: "center",
-          gap: 4,
+          gap: 6,
+          transition: "color 0.15s ease",
         }}
+        onMouseEnter={(e) => (e.currentTarget.style.color = COLOR.text.primary)}
+        onMouseLeave={(e) => (e.currentTarget.style.color = COLOR.text.secondary)}
       >
-        <span style={{ fontSize: 10 }}>{open ? "\u25BE" : "\u25B8"}</span>
+        <span style={{ fontSize: 9, color: COLOR.text.muted, width: 8, textAlign: "center" }}>{open ? "▼" : "▶"}</span>
         Methodology & Data Notes
       </button>
 
       {open && (
-        <div style={{ maxWidth: "65ch", marginTop: 8, fontSize: bodyFontSize }}>
+        <div style={{ maxWidth: "65ch", marginTop: 8, marginBottom: 12, fontSize: bodyFontSize }}>
           {granularity === "state" && (
             <>
               <h4 style={HEADING_STYLE}>State-level view</h4>
@@ -151,7 +154,7 @@ export function MethodologyNotes({ granularity, compact }: Props) {
           <ul style={{ listStyle: "disc", paddingLeft: 20, margin: 0 }}>
             <li style={LI_STYLE}>
               Default view shows <strong>gross</strong> nameplate MW additions. Use the <strong>Gross/Net
-              toggle</strong> to subtract retirements — retirement data from EIA-860M (Retired sheet,
+                toggle</strong> to subtract retirements — retirement data from EIA-860M (Retired sheet,
               same vintage as additions). Key net figures: ISO-NE 2024 net <strong>−1,412 MW</strong> (1,937
               retired vs 525 added); PJM 2023 net +901 MW (7,009 retired from 7,910 gross); MISO 2024
               net +2,776 MW (4,380 retired). Negative net values shift bubbles left of the origin.

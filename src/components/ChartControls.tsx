@@ -1,6 +1,6 @@
 import type { ViewTab, PriceMetric, CapacityWeighting, CapacityBasis } from "../lib/types";
 import type { YearKey } from "../App";
-import { FONT, COLOR } from "../lib/theme";
+import { FONT, COLOR, TRANSITION } from "../lib/theme";
 
 interface Props {
   compact?: boolean;
@@ -65,7 +65,7 @@ function Segment<T extends string>({
   compact?: boolean;
 }) {
   const isPrimary = tier === "primary";
-  const radius = 3;
+  const radius = 6;
   const borderRadius =
     position === "only"
       ? radius
@@ -78,32 +78,27 @@ function Segment<T extends string>({
   return (
     <button
       onClick={() => onClick(value)}
-      onPointerDown={(e) => { (e.currentTarget as HTMLElement).style.opacity = "0.7"; }}
-      onPointerUp={(e) => { (e.currentTarget as HTMLElement).style.opacity = "1"; }}
-      onPointerLeave={(e) => { (e.currentTarget as HTMLElement).style.opacity = "1"; }}
       aria-pressed={active}
       style={{
         padding: isPrimary
           ? compact
-            ? "6px 10px"
-            : "6px 14px"
+            ? "6px 12px"
+            : "7px 16px"
           : compact
-            ? "4px 9px"
-            : "4px 12px",
+            ? "5px 10px"
+            : "5px 13px",
         border: "1px solid",
         borderColor: active
           ? isPrimary
             ? COLOR.text.secondary
-            : COLOR.text.disabled
-          : isPrimary
-            ? COLOR.border.default
-            : COLOR.border.default,
+            : COLOR.border.strong
+          : COLOR.border.default,
         borderRadius,
         marginLeft: position === "first" || position === "only" ? 0 : -1,
         background: active
           ? isPrimary
             ? COLOR.text.secondary
-            : COLOR.surface.subtle
+            : COLOR.surface.muted
           : "#fff",
         color: active
           ? isPrimary
@@ -122,11 +117,16 @@ function Segment<T extends string>({
             : 12,
         fontWeight: active ? 600 : 400,
         cursor: "pointer",
-        transition: "all 0.15s ease",
+        transition: TRANSITION,
         position: "relative",
         zIndex: active ? 1 : 0,
         lineHeight: 1.4,
         whiteSpace: "nowrap",
+        boxShadow: active
+          ? isPrimary
+            ? "0 1px 3px rgba(0,0,0,0.12)"
+            : "inset 0 1px 2px rgba(0,0,0,0.06)"
+          : "0 1px 2px rgba(0,0,0,0.03)",
       }}
     >
       {label}
@@ -171,7 +171,7 @@ function SmallToggleGroup<T extends string>({
         style={{
           display: "inline-flex",
           border: `1px solid ${COLOR.border.default}`,
-          borderRadius: 3,
+          borderRadius: 6,
           overflow: "hidden",
         }}
       >
@@ -181,22 +181,19 @@ function SmallToggleGroup<T extends string>({
             <button
               key={o.value}
               onClick={() => onClick(o.value)}
-              onPointerDown={(e) => { (e.currentTarget as HTMLElement).style.opacity = "0.7"; }}
-              onPointerUp={(e) => { (e.currentTarget as HTMLElement).style.opacity = "1"; }}
-              onPointerLeave={(e) => { (e.currentTarget as HTMLElement).style.opacity = "1"; }}
               aria-pressed={isActive}
               style={{
-                padding: compact ? "2px 7px" : "2px 9px",
+                padding: compact ? "3px 8px" : "3px 10px",
                 border: "none",
                 borderLeft: i > 0 ? `1px solid ${COLOR.border.default}` : "none",
                 borderRadius: 0,
-                background: isActive ? COLOR.surface.subtle : "#fff",
+                background: isActive ? COLOR.surface.muted : "#fff",
                 color: isActive ? COLOR.text.secondary : COLOR.text.disabled,
                 fontFamily: FONT.body,
                 fontSize: compact ? 10 : 11,
                 fontWeight: isActive ? 600 : 400,
                 cursor: "pointer",
-                transition: "all 0.15s ease",
+                transition: TRANSITION,
                 lineHeight: 1.6,
               }}
             >
@@ -289,7 +286,7 @@ export function ChartControls({
           gap: 0,
           alignItems: "center",
           flexWrap: "wrap",
-          marginBottom: 4,
+          marginBottom: 12,
         }}
       >
         <span
@@ -327,23 +324,35 @@ export function ChartControls({
           title={playing ? "Pause" : "Play through years"}
           style={{
             marginLeft: 8,
-            padding: 0,
+            padding: "2px 4px",
             border: "none",
-            borderRadius: 0,
-            background: "none",
+            borderRadius: 4,
+            background: playing ? `${COLOR.accent.brand}14` : "none",
             color: playing ? COLOR.accent.brand : COLOR.text.disabled,
             fontFamily: FONT.body,
             fontSize: compact ? 12 : 13,
             fontWeight: 400,
             cursor: "pointer",
-            transition: "all 0.15s ease",
+            transition: TRANSITION,
             lineHeight: 1,
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
+            gap: 4,
           }}
         >
           {playing ? "\u23F8" : "\u25B6"}
+          {playing && (
+            <span
+              style={{
+                width: 6,
+                height: 6,
+                borderRadius: "50%",
+                background: COLOR.accent.brand,
+                animation: "pulse 1.5s ease-in-out infinite",
+              }}
+            />
+          )}
         </button>
       </div>
 

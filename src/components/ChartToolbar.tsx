@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, type RefObject } from "react";
-import { FONT, COLOR } from "../lib/theme";
+import { FONT, COLOR, TRANSITION } from "../lib/theme";
 import { downloadCsv } from "./SourceDataTable";
 
 const DEPLOY_URL =
@@ -121,15 +121,16 @@ function getBtnStyle(isCompact?: boolean): React.CSSProperties {
     gap: 5,
     padding: "6px 10px",
     minHeight: isCompact ? 40 : 36,
-    border: `1px solid ${COLOR.border.strong}`,
-    borderRadius: 4,
+    border: `1px solid ${COLOR.border.default}`,
+    borderRadius: 6,
     background: "#fff",
     color: COLOR.text.tertiary,
     fontFamily: FONT.body,
     fontSize: 12,
     cursor: "pointer",
-    transition: "all 0.15s ease",
+    transition: TRANSITION,
     lineHeight: 1,
+    boxShadow: "0 1px 2px rgba(0,0,0,0.04)",
   };
 }
 
@@ -173,11 +174,6 @@ export function ChartToolbar({ svgRef, width, height, compact }: Props) {
   }
 
   const style = getBtnStyle(compact);
-  const pointerHandlers = {
-    onPointerDown: (e: React.PointerEvent) => { (e.currentTarget as HTMLElement).style.opacity = "0.7"; },
-    onPointerUp: (e: React.PointerEvent) => { (e.currentTarget as HTMLElement).style.opacity = "1"; },
-    onPointerLeave: (e: React.PointerEvent) => { (e.currentTarget as HTMLElement).style.opacity = "1"; },
-  };
 
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
@@ -194,7 +190,6 @@ export function ChartToolbar({ svgRef, width, height, compact }: Props) {
             e.currentTarget.style.borderColor = COLOR.border.strong;
             e.currentTarget.style.color = COLOR.text.tertiary;
           }}
-          {...pointerHandlers}
         >
           <DownloadIcon /> Download
         </button>
@@ -260,7 +255,6 @@ export function ChartToolbar({ svgRef, width, height, compact }: Props) {
           e.currentTarget.style.borderColor = COLOR.border.strong;
           e.currentTarget.style.color = COLOR.text.tertiary;
         }}
-        {...pointerHandlers}
       >
         <ShareIcon /> Share
       </button>
@@ -277,7 +271,6 @@ export function ChartToolbar({ svgRef, width, height, compact }: Props) {
           e.currentTarget.style.borderColor = COLOR.border.strong;
           e.currentTarget.style.color = COLOR.text.tertiary;
         }}
-        {...pointerHandlers}
       >
         <EmbedIcon /> Embed
       </button>
