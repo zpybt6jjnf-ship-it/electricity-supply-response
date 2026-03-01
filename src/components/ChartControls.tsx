@@ -46,37 +46,82 @@ const yearLabels: Record<YearKey, string> = {
   "2025": "2025 (est.)",
 };
 
-/* ── Tier 1: View tabs ─────────────────────────────────────────────── */
-function ViewTab({
+/* ── Segmented control (shared by view tabs + year) ────────────────── */
+function Segment<T extends string>({
   value,
   label,
   active,
   onClick,
+  position,
+  tier,
   compact,
 }: {
-  value: ViewTab;
+  value: T;
   label: string;
   active: boolean;
-  onClick: (v: ViewTab) => void;
+  onClick: (v: T) => void;
+  position: "first" | "middle" | "last" | "only";
+  tier: "primary" | "secondary";
   compact?: boolean;
 }) {
+  const isPrimary = tier === "primary";
+  const radius = 3;
+  const borderRadius =
+    position === "only"
+      ? radius
+      : position === "first"
+        ? `${radius}px 0 0 ${radius}px`
+        : position === "last"
+          ? `0 ${radius}px ${radius}px 0`
+          : "0";
+
   return (
     <button
       onClick={() => onClick(value)}
       aria-pressed={active}
       style={{
-        padding: compact ? "6px 0" : "6px 2px",
-        marginRight: compact ? 14 : 18,
-        border: "none",
-        borderBottom: active ? "2px solid #333" : "2px solid transparent",
-        borderRadius: 0,
-        background: "none",
-        color: active ? "#1a1a1a" : "#999",
+        padding: isPrimary
+          ? compact
+            ? "6px 10px"
+            : "6px 14px"
+          : compact
+            ? "4px 9px"
+            : "4px 12px",
+        border: "1px solid",
+        borderColor: active
+          ? isPrimary
+            ? "#333"
+            : "#888"
+          : isPrimary
+            ? "#bbb"
+            : "#ccc",
+        borderRadius,
+        marginLeft: position === "first" || position === "only" ? 0 : -1,
+        background: active
+          ? isPrimary
+            ? "#333"
+            : "#f5f5f5"
+          : "#fff",
+        color: active
+          ? isPrimary
+            ? "#fff"
+            : "#333"
+          : isPrimary
+            ? "#555"
+            : "#888",
         fontFamily: FONT.body,
-        fontSize: compact ? 11.5 : 13,
+        fontSize: isPrimary
+          ? compact
+            ? 11.5
+            : 12.5
+          : compact
+            ? 11
+            : 12,
         fontWeight: active ? 600 : 400,
         cursor: "pointer",
         transition: "all 0.15s ease",
+        position: "relative",
+        zIndex: active ? 1 : 0,
         lineHeight: 1.4,
         whiteSpace: "nowrap",
       }}
@@ -86,97 +131,8 @@ function ViewTab({
   );
 }
 
-/* ── Tier 2: Year segmented control ────────────────────────────────── */
-function YearSegment({
-  value,
-  label,
-  active,
-  onClick,
-  position,
-  compact,
-}: {
-  value: YearKey;
-  label: string;
-  active: boolean;
-  onClick: (v: YearKey) => void;
-  position: "first" | "middle" | "last";
-  compact?: boolean;
-}) {
-  const radius = 3;
-  const borderRadius =
-    position === "first"
-      ? `${radius}px 0 0 ${radius}px`
-      : position === "last"
-        ? `0 ${radius}px ${radius}px 0`
-        : "0";
-
-  return (
-    <button
-      onClick={() => onClick(value)}
-      aria-pressed={active}
-      style={{
-        padding: compact ? "5px 10px" : "5px 14px",
-        border: "1px solid",
-        borderColor: active ? "#333" : "#bbb",
-        borderRadius,
-        // collapse internal borders so there's no doubling
-        marginLeft: position === "first" ? 0 : -1,
-        background: active ? "#333" : "#fff",
-        color: active ? "#fff" : "#666",
-        fontFamily: FONT.body,
-        fontSize: compact ? 11.5 : 12.5,
-        fontWeight: active ? 600 : 400,
-        cursor: "pointer",
-        transition: "all 0.15s ease",
-        position: "relative",
-        zIndex: active ? 1 : 0,
-        lineHeight: 1.4,
-      }}
-    >
-      {label}
-    </button>
-  );
-}
-
-/* ── Tier 3: Inline text toggle ────────────────────────────────────── */
-function TextToggle<T extends string>({
-  value,
-  label,
-  active,
-  onClick,
-  compact,
-}: {
-  value: T;
-  label: string;
-  active: boolean;
-  onClick: (v: T) => void;
-  compact?: boolean;
-}) {
-  return (
-    <button
-      onClick={() => onClick(value)}
-      aria-pressed={active}
-      style={{
-        padding: "2px 1px",
-        border: "none",
-        borderRadius: 0,
-        background: "none",
-        color: active ? "#333" : "#aaa",
-        fontFamily: FONT.body,
-        fontSize: compact ? 10.5 : 11.5,
-        fontWeight: active ? 600 : 400,
-        cursor: "pointer",
-        transition: "all 0.15s ease",
-        lineHeight: 1.4,
-        borderBottom: active ? "1px solid #999" : "1px solid transparent",
-      }}
-    >
-      {label}
-    </button>
-  );
-}
-
-function TextToggleGroup<T extends string>({
+/* ── Tier 3: Small pill toggle ─────────────────────────────────────── */
+function SmallToggleGroup<T extends string>({
   label,
   options,
   activeValue,
@@ -193,30 +149,56 @@ function TextToggleGroup<T extends string>({
     <span
       style={{
         display: "inline-flex",
-        alignItems: "baseline",
-        gap: compact ? 4 : 5,
+        alignItems: "center",
+        gap: 0,
       }}
     >
       <span
         style={{
-          color: "#999",
+          color: "#767676",
           fontSize: compact ? 10 : 11,
           fontFamily: FONT.body,
           whiteSpace: "nowrap",
+          marginRight: compact ? 4 : 5,
         }}
       >
         {label}
       </span>
-      {options.map((o) => (
-        <TextToggle
-          key={o.value}
-          value={o.value}
-          label={o.label}
-          active={activeValue === o.value}
-          onClick={onClick}
-          compact={compact}
-        />
-      ))}
+      <span
+        style={{
+          display: "inline-flex",
+          border: "1px solid #ccc",
+          borderRadius: 3,
+          overflow: "hidden",
+        }}
+      >
+        {options.map((o, i) => {
+          const isActive = activeValue === o.value;
+          return (
+            <button
+              key={o.value}
+              onClick={() => onClick(o.value)}
+              aria-pressed={isActive}
+              style={{
+                padding: compact ? "2px 7px" : "2px 9px",
+                border: "none",
+                borderLeft: i > 0 ? "1px solid #ccc" : "none",
+                borderRadius: 0,
+                background: isActive ? "#f5f5f5" : "#fff",
+                color: isActive ? "#333" : "#aaa",
+                fontFamily: FONT.body,
+                fontSize: compact ? 10 : 11,
+                fontWeight: isActive ? 600 : 400,
+                cursor: "pointer",
+                transition: "all 0.15s ease",
+                lineHeight: 1.6,
+              }}
+            >
+              {o.label}
+            </button>
+          );
+        })}
+      </span>
     </span>
   );
 }
@@ -242,74 +224,86 @@ export function ChartControls({
   const showPriceBasis = isIsoView;
   const showSecondaryRow = showCapBasis || showPriceBasis;
 
+  const labelWidth = compact ? 34 : 40;
+
   return (
     <div
       style={{
         display: "flex",
         flexDirection: "column",
-        gap: 6,
+        gap: 0,
         fontFamily: FONT.body,
         fontSize: compact ? 11 : 13,
       }}
     >
-      {/* Tier 1 — View tabs: underline style */}
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          flexWrap: "wrap",
-          borderBottom: "1px solid #e8e8e8",
-          paddingBottom: 1,
-        }}
-      >
-        <span
-          style={{
-            color: "#767676",
-            marginRight: 8,
-            fontSize: compact ? 11 : 12.5,
-            fontFamily: FONT.body,
-          }}
-        >
-          View
-        </span>
-        {tabOptions.map((o) => (
-          <ViewTab
-            key={o.value}
-            value={o.value}
-            label={o.label}
-            active={viewTab === o.value}
-            onClick={onViewTabChange}
-            compact={compact}
-          />
-        ))}
-      </div>
-
-      {/* Tier 2 — Year: segmented control */}
+      {/* Tier 1 — View: primary segmented control (dark fill) */}
       <div
         style={{
           display: "flex",
           gap: 0,
           alignItems: "center",
           flexWrap: "wrap",
+          marginBottom: 6,
         }}
       >
         <span
           style={{
             color: "#767676",
-            marginRight: 8,
-            fontSize: compact ? 11 : 12.5,
+            minWidth: labelWidth,
+            fontSize: compact ? 11 : 12,
+            fontFamily: FONT.body,
+          }}
+        >
+          View
+        </span>
+        {tabOptions.map((o, i) => (
+          <Segment
+            key={o.value}
+            value={o.value}
+            label={o.label}
+            active={viewTab === o.value}
+            onClick={onViewTabChange}
+            tier="primary"
+            position={
+              i === 0
+                ? "first"
+                : i === tabOptions.length - 1
+                  ? "last"
+                  : "middle"
+            }
+            compact={compact}
+          />
+        ))}
+      </div>
+
+      {/* Tier 2 — Year: secondary segmented control (outline) */}
+      <div
+        style={{
+          display: "flex",
+          gap: 0,
+          alignItems: "center",
+          flexWrap: "wrap",
+          marginBottom: 4,
+        }}
+      >
+        <span
+          style={{
+            color: "#767676",
+            minWidth: labelWidth,
+            fontSize: compact ? 11 : 12,
             fontFamily: FONT.body,
           }}
         >
           Year
         </span>
         {availableYears.map((y, i) => (
-          <YearSegment
+          <Segment
             key={y}
             value={y}
             label={yearLabels[y]}
             active={year === y}
             onClick={onYearChange}
+            tier="secondary"
             position={
               i === 0
                 ? "first"
@@ -331,7 +325,7 @@ export function ChartControls({
             border: "none",
             borderRadius: 0,
             background: "none",
-            color: playing ? "#2a9d8f" : "#bbb",
+            color: playing ? "#2a9d8f" : "#999",
             fontFamily: FONT.body,
             fontSize: compact ? 12 : 13,
             fontWeight: 400,
@@ -347,18 +341,19 @@ export function ChartControls({
         </button>
       </div>
 
-      {/* Tier 3 — Secondary settings: inline text toggles */}
+      {/* Tier 3 — Secondary settings: small toggle groups */}
       {showSecondaryRow && (
         <div
           style={{
             display: "flex",
-            alignItems: "baseline",
+            alignItems: "center",
             flexWrap: "wrap",
-            gap: compact ? 8 : 12,
+            gap: compact ? 8 : 14,
+            paddingLeft: labelWidth,
           }}
         >
           {showCapBasis && (
-            <TextToggleGroup
+            <SmallToggleGroup
               label="Capacity:"
               options={weightingOptions}
               activeValue={weighting}
@@ -367,7 +362,7 @@ export function ChartControls({
             />
           )}
           {showCapBasis && (
-            <TextToggleGroup
+            <SmallToggleGroup
               label="Gross/net:"
               options={basisOptions}
               activeValue={basis}
@@ -376,7 +371,7 @@ export function ChartControls({
             />
           )}
           {showPriceBasis && (
-            <TextToggleGroup
+            <SmallToggleGroup
               label="Price:"
               options={priceOptions}
               activeValue={priceMetric}

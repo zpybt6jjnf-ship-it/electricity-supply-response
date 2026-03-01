@@ -126,7 +126,7 @@ All critical (P0) and major (P1) items have been resolved across 4 implementatio
 
 | # | Issue | Source | Status | Notes |
 |---|---|---|---|---|
-| **P3-1** | Connected scatter trails across years | DataViz | **OPEN** | Highest-impact visual upgrade remaining. Est. 4hr+. |
+| **P3-1** | Connected scatter trails across years | DataViz | **OPEN** | Preferred approach: **on-hover only** — trails appear when clicking/hovering an ISO, default view stays clean. Persistent trails for all 7 ISOs are too cluttered. Est. 4hr+. |
 | **P3-2** | Hidden accessible data table | UX | **DONE** | HiddenDataTable.tsx shipped in P0-2 resolution |
 | **P3-3** | Gross/net capacity toggle | Energy | **DONE** | Full gross/net toggle with EIA-860M retirement data for all ISOs/states/years. Negative X-axis domain for net retirements. Tooltip shows "Net per GW peak" in net mode. (`6794eab`) |
 | **P3-4** | Force-directed state label layout | DataViz | **OPEN** | Replace hand-tuned offsets. Est. 4hr+. |
