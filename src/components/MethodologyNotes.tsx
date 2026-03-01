@@ -147,10 +147,11 @@ export function MethodologyNotes({ granularity }: Props) {
           <h4 style={HEADING_STYLE}>Capacity measurement</h4>
           <ul style={{ listStyle: "disc", paddingLeft: 20, margin: 0 }}>
             <li style={LI_STYLE}>
-              All capacity figures are gross nameplate MW additions, not net of retirements. Gross
-              figures overstate net additions, especially for MISO and ISO-NE. Material 2024
-              retirements: MISO ~1.8 GW coal (South Oak Creek, Rush Island); ISO-NE 1.4 GW
-              (Mystic CC, June 2024); PJM ~0.2 GW (Warrior Run coal/cogen, June 2024).
+              Default view shows <strong>gross</strong> nameplate MW additions. Use the <strong>Gross/Net
+              toggle</strong> to subtract retirements — retirement data from EIA-860M (Retired sheet,
+              same vintage as additions). Key net figures: ISO-NE 2024 net <strong>−1,412 MW</strong> (1,937
+              retired vs 525 added); PJM 2023 net +901 MW (7,009 retired from 7,910 gross); MISO 2024
+              net +2,776 MW (4,380 retired). Negative net values shift bubbles left of the origin.
             </li>
             <li style={LI_STYLE}>
               Nameplate MW overstates variable resources. 1 MW solar does not equal 1 MW gas for

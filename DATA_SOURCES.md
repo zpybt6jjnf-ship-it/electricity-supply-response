@@ -29,6 +29,38 @@ Authoritative source reference for reproducing `data/audit_all_data.csv` from sc
 
 ---
 
+### Step 1b: Retirements (EIA-860M Retired Sheet)
+
+**Source:** Same EIA-860M file as Step 1
+**Sheet:** "Retired" (not "Operating")
+
+**ISO-level extraction:**
+1. Open the "Retired" sheet (headers on row 3)
+2. Filter: Retirement Year = target year
+3. Group by Balancing Authority Code using the BA → ISO mapping (below)
+4. Sum Nameplate Capacity (MW) for `retirements_mw`
+
+**State-level extraction:**
+1. Same sheet, filter Retirement Year = target year
+2. Group by Plant State (2-letter code)
+3. Sum Nameplate Capacity (MW)
+
+**Key columns in the Retired sheet:**
+- Column: Balancing Authority Code (use BA → ISO mapping)
+- Column: Plant State (2-letter)
+- Column: Nameplate Capacity (MW)
+- Column: Retirement Year (integer)
+
+**Notes:**
+- BA codes need `str().strip()` conversion — some have trailing whitespace
+- Not all retired generators have BA codes; those without are excluded from ISO-level aggregation but included in state-level
+- Net additions = `capacity_additions_mw - retirements_mw`. Can be negative (e.g., ISO-NE 2024: −1,412 MW)
+
+**CSV column updated:** `retirements_mw`
+**Source citation format:** `EIA-860M [month] [year] vintage Retired sheet`
+
+---
+
 ### Step 2: Peak Demand
 
 **ISO-level — two options (prefer whichever is available first):**

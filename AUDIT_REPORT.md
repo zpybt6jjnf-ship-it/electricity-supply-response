@@ -128,14 +128,14 @@ All critical (P0) and major (P1) items have been resolved across 4 implementatio
 |---|---|---|---|---|
 | **P3-1** | Connected scatter trails across years | DataViz | **OPEN** | Highest-impact visual upgrade remaining. Est. 4hr+. |
 | **P3-2** | Hidden accessible data table | UX | **DONE** | HiddenDataTable.tsx shipped in P0-2 resolution |
-| **P3-3** | Gross/net capacity toggle | Energy | **PARTIAL** | Tooltip shows net when data exists. Full toggle needs comprehensive retirement data. |
+| **P3-3** | Gross/net capacity toggle | Energy | **DONE** | Full gross/net toggle with EIA-860M retirement data for all ISOs/states/years. Negative X-axis domain for net retirements. Tooltip shows "Net per GW peak" in net mode. (`6794eab`) |
 | **P3-4** | Force-directed state label layout | DataViz | **OPEN** | Replace hand-tuned offsets. Est. 4hr+. |
 
 ---
 
 ## Open Items Summary
 
-4 items remain, all enhancements (no bugs or compliance issues):
+3 items remain, all enhancements (no bugs or compliance issues):
 
 | # | Item | Effort | Impact |
 |---|---|---|---|
