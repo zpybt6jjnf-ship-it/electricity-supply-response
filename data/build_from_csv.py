@@ -57,12 +57,14 @@ METADATA = {
         "author": "Bottlenecks Lab",
         "primary_year": 2025,
         "notes": (
-            "PJM and MISO estimates. Both ISOs have locked-in capacity auction "
-            "results for 2025/26 delivery year. PJM BRA at $269.92/MW-day "
-            "(~$18/MWh adder, 9\u00d7 increase). MISO PRA at $217/MW-day "
-            "annualized (~$9/MWh adder, 10\u00d7 increase; summer peak "
-            "$666.50/MW-day, 22\u00d7 increase). Wholesale prices and capacity "
-            "additions estimated at levels similar to 2024."
+            "All 7 ISO estimates for 2025. No annual SOM reports published yet "
+            "(expect May\u2013Aug 2026). Prices: ERCOT $37.57 and SPP $37.91 from "
+            "EIA STEO monthly; CAISO ~$35 from DMM quarterly reports; NYISO and "
+            "ISO-NE ~$55 from Potomac Economics/ISO Newswire (winter gas spikes). "
+            "PJM BRA 2025/26 at $269.92/MW-day (~$18/MWh adder, 9\u00d7 increase). "
+            "MISO PRA at $217/MW-day annualized (~$9/MWh adder, 10\u00d7 increase). "
+            "Capacity: ERCOT 11 GW from Modo Energy; CAISO 5.7 GW from Year in "
+            "Review; others estimated proportionally to 2024."
         ),
     },
     ("state", 2023): {
@@ -168,10 +170,6 @@ def build_record(row):
         rec["confidence"] = confidence
 
     rec["color_group"] = row["color_group"]
-
-    sr = row.get("siting_regime", "")
-    if sr:
-        rec["siting_regime"] = sr
 
     # qualitative_note
     qn = row.get("qualitative_note", "")

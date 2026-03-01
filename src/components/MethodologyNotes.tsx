@@ -105,16 +105,13 @@ export function MethodologyNotes({ granularity }: Props) {
               figures minus capacity adders (medium confidence, marked in tooltip).
             </li>
             <li style={LI_STYLE}>
-              <strong>PJM 2025 estimate:</strong> The BRA 2025/26 cleared at $269.92/MW-day (~$18/MWh
-              capacity adder) — this price is locked in. Wholesale energy is estimated at ~$34/MWh (similar
-              to 2024). All-in ~$52/MWh. Capacity additions estimated at ~4,000 MW (queue still clogged).
-              Shown with dashed outline to distinguish from observed data.
-            </li>
-            <li style={LI_STYLE}>
-              <strong>MISO 2025 estimate:</strong> The PRA 2025/26 cleared at $217.50/MW-day annualized
-              (~$9/MWh capacity adder, a 10× increase from 2024). Summer peak reached $666.50/MW-day
-              (22× increase). Wholesale estimated at ~$31/MWh, all-in ~$40/MWh. MISO's capacity shortfall
-              is structural — retirements outpacing additions in key zones.
+              <strong>2025 estimates (all 7 ISOs):</strong> No annual SOM reports published yet
+              (expect May–Aug 2026). Prices: ERCOT $37.57 and SPP $37.91 from EIA STEO monthly;
+              CAISO ~$35 from DMM quarterly; NYISO and ISO-NE ~$55 (winter gas spikes). PJM BRA
+              2025/26 at $269.92/MW-day (~$18/MWh capacity adder, 9× increase); MISO PRA at
+              $217/MW-day annualized (~$9/MWh, 10× increase). Capacity: ERCOT 11 GW (Modo Energy),
+              CAISO 5.7 GW (Year in Review), others estimated proportionally to 2024. All shown
+              with dashed outline to distinguish from observed data.
             </li>
           </ul>
 

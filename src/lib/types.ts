@@ -27,7 +27,6 @@ export interface ISODataPoint {
   isEstimate?: boolean;
   confidence?: string;
   color_group: ColorGroup;
-  siting_regime?: string;
   avg_queue_duration_months?: number;
   qualitative_note: string;
   sources: {

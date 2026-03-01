@@ -307,22 +307,6 @@ State-level: inherited from parent ISO.
 
 ---
 
-### Siting Regime Classification
-
-Used for state-view bubble coloring. Classifies how each state handles energy project siting authority.
-
-| Category | States | Criteria |
-|----------|--------|----------|
-| Permissive | TX, IL, IN, MN, MI, IA, WI, LA, MS, AR, OK, KS, NE, NM, VA | Active buildout relative to demand, no documented siting barriers |
-| Moderate Friction | CA, PA, MD, NC, DE, MO, KY | Some constraints (land, policy mix, slow transition) but building still occurs |
-| Restrictive | NY, OH, WV, NJ, MA, CT, ME, NH, VT, RI | Explicit siting barriers, hostile policy, or high prices with minimal building |
-
-**Source:** Derived from EIA-860M buildout data, ISO market monitor reports, and documented state-level siting barriers (e.g., OH SB 52 township veto, NY Article 10 friction, ME CMP corridor rejection, VT Act 250).
-
-**CSV column:** `siting_regime` (state rows only; ISO rows leave blank)
-
----
-
 ### Average Queue Duration
 
 Average time from interconnection request to commercial operation for projects in the ISO's queue.

@@ -4,9 +4,33 @@
     "author": "Bottlenecks Lab",
     "compiled": "2025",
     "primary_year": 2025,
-    "notes": "PJM and MISO estimates. Both ISOs have locked-in capacity auction results for 2025/26 delivery year. PJM BRA at $269.92/MW-day (~$18/MWh adder, 9× increase). MISO PRA at $217/MW-day annualized (~$9/MWh adder, 10× increase; summer peak $666.50/MW-day, 22× increase). Wholesale prices and capacity additions estimated at levels similar to 2024."
+    "notes": "All 7 ISO estimates for 2025. No annual SOM reports published yet (expect May–Aug 2026). Prices: ERCOT $37.57 and SPP $37.91 from EIA STEO monthly; CAISO ~$35 from DMM quarterly reports; NYISO and ISO-NE ~$55 from Potomac Economics/ISO Newswire (winter gas spikes). PJM BRA 2025/26 at $269.92/MW-day (~$18/MWh adder, 9× increase). MISO PRA at $217/MW-day annualized (~$9/MWh adder, 10× increase). Capacity: ERCOT 11 GW from Modo Energy; CAISO 5.7 GW from Year in Review; others estimated proportionally to 2024."
   },
   "isos": [
+    {
+      "id": "ERCOT",
+      "name": "Electric Reliability Council of Texas",
+      "region": "Texas",
+      "wholesale_price_mwh": 37.57,
+      "all_in_price_mwh": 37.57,
+      "capacity_additions_mw": 11000,
+      "capacity_additions_elcc_mw": 5400,
+      "project_count": 160,
+      "peak_demand_gw": 86.0,
+      "queue_completion_pct": 42.6,
+      "queue_cohort": "2018–2020",
+      "avg_queue_duration_months": 32,
+      "isEstimate": true,
+      "confidence": "$37.57 computed from 12 months of EIA STEO (ERCOT North Hub DA). Capacity from Modo Energy annual report. No annual SOM published yet.",
+      "color_group": "functional",
+      "qualitative_note": "Energy-only market. Price rose from $27.33 to $37.57 in 2025 — supply response taking a breather after massive 2024 buildout (14 GW). Battery and solar still dominating additions.",
+      "sources": {
+        "price": "EIA STEO monthly wholesale data (ERCOT North Hub DA, 12-month avg)",
+        "capacity": "Modo Energy 2025 Annual Report (5,200 MW battery + 4,500 MW solar + wind/gas)",
+        "peak": "Estimated ~86 GW (similar to 2024)",
+        "queue": "Brattle/Grid Strategies/AEU Scorecard (2018–2020 cohort, 42.6%)"
+      }
+    },
     {
       "id": "MISO",
       "name": "Midcontinent ISO",
@@ -32,6 +56,30 @@
       }
     },
     {
+      "id": "CAISO",
+      "name": "California ISO",
+      "region": "California",
+      "wholesale_price_mwh": 35.0,
+      "all_in_price_mwh": 40.0,
+      "capacity_additions_mw": 5713,
+      "capacity_additions_elcc_mw": 4100,
+      "project_count": 100,
+      "peak_demand_gw": 49.0,
+      "queue_completion_pct": 10,
+      "queue_cohort": "2000–2019",
+      "avg_queue_duration_months": 54,
+      "isEstimate": true,
+      "confidence": "Estimated from CAISO DMM Q1–Q3 quarterly reports. Capacity from CAISO 2025 Year in Review. No annual SOM published yet.",
+      "color_group": "intermediate",
+      "qualitative_note": "Battery storage buildout continues — 4,260 MW of batteries in 2025 (CAISO Year in Review). Wholesale prices declined from $38 to ~$35 due to solar oversupply suppressing midday prices.",
+      "sources": {
+        "price": "CAISO DMM Q1–Q3 2025 Quarterly Reports (estimated annual DA avg)",
+        "capacity": "CAISO 2025 Year in Review (includes 4,260 MW battery)",
+        "peak": "Estimated ~49 GW (trending up from 48.3 GW in 2024)",
+        "queue": "LBNL Queued Up (2000–2019 cohort)"
+      }
+    },
+    {
       "id": "PJM",
       "name": "PJM Interconnection",
       "region": "Mid-Atlantic & Midwest (13 states + DC)",
@@ -53,6 +101,78 @@
         "capacity": "Estimated ~4,000 MW (similar to 2024 EIA-860M, queue still clogged)",
         "peak": "Estimated ~155 GW (trending up from 152.6 GW in 2024 due to data center growth)",
         "queue": "LBNL Queued Up (2000–2019 cohort); queue backlog persists"
+      }
+    },
+    {
+      "id": "SPP",
+      "name": "Southwest Power Pool",
+      "region": "Central US",
+      "wholesale_price_mwh": 37.91,
+      "all_in_price_mwh": 39.0,
+      "capacity_additions_mw": 1200,
+      "capacity_additions_elcc_mw": 300,
+      "project_count": 30,
+      "peak_demand_gw": 55.0,
+      "queue_completion_pct": 15,
+      "queue_cohort": "2000–2019",
+      "avg_queue_duration_months": 45,
+      "isEstimate": true,
+      "confidence": "$37.91 computed from 12 months of EIA STEO (SPP South Hub DA). Capacity estimated proportionally to 2024.",
+      "color_group": "intermediate",
+      "qualitative_note": "Wind-dominated resource mix. Prices jumped ~38% from $27.56 to $37.91 driven by gas price increases and demand growth. Modest additions continue.",
+      "sources": {
+        "price": "EIA STEO monthly wholesale data (SPP South Hub DA, 12-month avg)",
+        "capacity": "Estimated ~1,200 MW (proportional to 2024 EIA-860M)",
+        "peak": "Estimated ~55 GW (similar to 2024)",
+        "queue": "LBNL Queued Up (2000–2019 cohort)"
+      }
+    },
+    {
+      "id": "NYISO",
+      "name": "New York ISO",
+      "region": "New York",
+      "wholesale_price_mwh": 55.0,
+      "all_in_price_mwh": 65.0,
+      "capacity_additions_mw": 800,
+      "capacity_additions_elcc_mw": 350,
+      "project_count": 18,
+      "peak_demand_gw": 30.0,
+      "queue_completion_pct": 10,
+      "queue_cohort": "2000–2019",
+      "avg_queue_duration_months": 52,
+      "isEstimate": true,
+      "confidence": "Estimated from Potomac Economics quarterly reports + EIA monthly. Gas-driven winter spikes pushed annual average up. Conservative energy-only estimate.",
+      "color_group": "broken",
+      "qualitative_note": "High-price year driven by gas-fueled winter spikes. Energy-only estimate ~$55/MWh. Minimal new supply despite CLCPA mandates. Offshore wind delays persist.",
+      "sources": {
+        "price": "Potomac Economics quarterly reports + EIA monthly wholesale data (2025 avg, energy-only estimate)",
+        "capacity": "Estimated ~800 MW (proportional to 2024 EIA-860M)",
+        "peak": "Estimated ~30 GW (similar to 2024)",
+        "queue": "LBNL Queued Up (2000–2019 cohort)"
+      }
+    },
+    {
+      "id": "ISO-NE",
+      "name": "ISO New England",
+      "region": "New England (6 states)",
+      "wholesale_price_mwh": 55.0,
+      "all_in_price_mwh": 65.0,
+      "capacity_additions_mw": 600,
+      "capacity_additions_elcc_mw": 250,
+      "project_count": 15,
+      "peak_demand_gw": 25.0,
+      "queue_completion_pct": 8,
+      "queue_cohort": "2000–2019",
+      "avg_queue_duration_months": 56,
+      "isEstimate": true,
+      "confidence": "Estimated from ISO Newswire monthly data. Winter spikes ($130+/MWh Dec/Jan/Feb) pulled annual average up significantly from 2024's $41.47.",
+      "color_group": "broken",
+      "qualitative_note": "Winter price spikes ($130+/MWh Dec/Jan/Feb) drove annual energy-only average from $41.47 to ~$55/MWh. Gas dependence + pipeline constraints amplified by cold winter. Minimal new capacity. Worst queue completion rate nationally.",
+      "sources": {
+        "price": "ISO Newswire monthly wholesale data (2025 avg, energy-only estimate)",
+        "capacity": "Estimated ~600 MW (proportional to 2024 EIA-860M)",
+        "peak": "Estimated ~25 GW (trending up from 24.4 GW in 2024)",
+        "queue": "LBNL Queued Up (2000–2019 cohort)"
       }
     }
   ]

@@ -6,7 +6,7 @@ import { useTooltip } from "@visx/tooltip";
 import type { ISODataPoint, XAxisMetric, PriceMetric, CapacityWeighting, GranularityLevel, ViewTab } from "../lib/types";
 import type { YearKey } from "../App";
 import { createScales, getXValue, getXLabel, getXSubtitle, getYValue, getYLabel } from "../lib/scales";
-import { GROUP_FILLS, GROUP_STROKES, SITING_FILLS, SITING_STROKES } from "../lib/colors";
+import { GROUP_FILLS, GROUP_STROKES } from "../lib/colors";
 import { FONT, AXIS_STYLE, GRID_STYLE } from "../lib/theme";
 import { ScatterTooltip } from "./ScatterTooltip";
 import { ChartControls } from "./ChartControls";
@@ -43,8 +43,13 @@ const LABEL_OFFSETS: Record<string, Record<string, Record<ViewKey, [number, numb
     "ISO-NE": { capacity: [-15, -18], capacity_elcc: [-15, -18], queue: [-52, 8] },
   },
   "2025": {
-    PJM:      { capacity: [15, -22],  capacity_elcc: [15, -22],  queue: [15, -22] },
+    ERCOT:    { capacity: [15, -30],  capacity_elcc: [15, -30],  queue: [15, -22] },
+    SPP:      { capacity: [15, -18],  capacity_elcc: [15, -18],  queue: [15, -18] },
     MISO:     { capacity: [15, -10],  capacity_elcc: [15, -10],  queue: [15, 8] },
+    CAISO:    { capacity: [-55, -20], capacity_elcc: [-55, -20], queue: [-55, -15] },
+    PJM:      { capacity: [15, -22],  capacity_elcc: [15, -22],  queue: [15, -22] },
+    NYISO:    { capacity: [15, -22],  capacity_elcc: [15, -22],  queue: [-52, -10] },
+    "ISO-NE": { capacity: [-15, -18], capacity_elcc: [-15, -18], queue: [-52, 8] },
   },
 };
 
@@ -453,8 +458,8 @@ export function ElectricityScatter({
             const cx = xScale(getXValue(d, metric, weighting)) ?? 0;
             const cy = yScale(getYValue(d, priceMetric, granularity)) ?? 0;
             const r = rScale(d.peak_demand_gw);
-            const bubbleFill = SITING_FILLS[d.siting_regime || ""] || "#999";
-            const bubbleStroke = SITING_STROKES[d.siting_regime || ""] || "#666";
+            const bubbleFill = GROUP_FILLS[d.color_group];
+            const bubbleStroke = GROUP_STROKES[d.color_group];
             return (
               <g
                 key={d.id}
@@ -647,13 +652,7 @@ export function ElectricityScatter({
 
         {/* Color legend — hidden on compact */}
         {!isCompact && (() => {
-          const colorLegendItems = isStateView
-            ? [
-                { label: "Permissive", fill: SITING_FILLS["Permissive"], stroke: SITING_STROKES["Permissive"] },
-                { label: "Moderate Friction", fill: SITING_FILLS["Moderate Friction"], stroke: SITING_STROKES["Moderate Friction"] },
-                { label: "Restrictive", fill: SITING_FILLS["Restrictive"], stroke: SITING_STROKES["Restrictive"] },
-              ]
-            : [
+          const colorLegendItems = [
                 { label: "Functional", fill: GROUP_FILLS.functional, stroke: GROUP_STROKES.functional },
                 { label: "Intermediate", fill: GROUP_FILLS.intermediate, stroke: GROUP_STROKES.intermediate },
                 { label: "Broken", fill: GROUP_FILLS.broken, stroke: GROUP_STROKES.broken },

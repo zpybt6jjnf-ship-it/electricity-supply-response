@@ -4,7 +4,7 @@
 
 This document provides a field-by-field audit trail for every data point in `data/verified/iso_scatter_data.json`. Each value is paired with its primary source citation, methodology annotation, and a verification checkbox. The goal: any reviewer can independently verify every number in the dataset without re-reading the methodology doc or hunting through source reports.
 
-**Scope:** 7 ISOs, ~15 fields each, calendar years 2023–2024 + PJM 2025 estimate.
+**Scope:** 7 ISOs, ~15 fields each, calendar years 2023–2025. 2025 data for all 7 ISOs are estimates (no annual SOM reports published yet).
 **Data vintage:** Compiled 2026-02-28, primary data year 2024. Multi-year update adds 2023 and PJM 2025 est.
 **Author:** Bottlenecks Lab
 
@@ -360,17 +360,20 @@ Capacity data from EIA-860M January 2026 vintage. Prices from market monitor rep
 
 ---
 
-## PJM 2025 Estimate
+## 2025 Estimates (All 7 ISOs)
 
-**Scope:** PJM only — the sole ISO with a locked-in dramatic price change.
+**Scope:** All 7 ISOs. No annual SOM reports published yet (expect May–Aug 2026). PJM and MISO have locked-in capacity auction results; others use EIA STEO monthly data, ISO quarterly reports, and proportional estimates.
 
-| Field | Value | Basis | Confidence |
-|-------|-------|-------|------------|
-| Wholesale price | ~$34/MWh | Similar to 2024, conservative | Medium |
-| Capacity adder | ~$18/MWh | BRA 2025/26 at $269.92/MW-day — locked in | High |
-| All-in price | ~$52/MWh | Wholesale + capacity | Medium-High |
-| Capacity additions | ~4,000 MW | Similar to 2024 EIA-860M, queue still clogged | Medium |
-| Peak demand | ~155 GW | Trending up from 152.6 due to data center growth | Medium |
-| Queue completion | 12% | Cohort-based, unchanged | High |
+| ISO | Wholesale | All-In | Capacity MW | Price Source | Capacity Source | Confidence |
+|-----|-----------|--------|-------------|-------------|-----------------|------------|
+| ERCOT | $37.57 | $37.57 | 11,000 | EIA STEO monthly (12-mo avg) | Modo Energy annual report | Medium-High |
+| SPP | $37.91 | $39.00 | 1,200 | EIA STEO monthly (12-mo avg) | Est. proportional to 2024 | Medium |
+| MISO | $31.00 | $40.00 | 7,000 | Est. similar to 2024 | Est. similar to 2024 | Medium |
+| PJM | $34.00 | $52.00 | 4,000 | Est. similar to 2024 | Est. similar to 2024 | Medium-High |
+| CAISO | $35.00 | $40.00 | 5,713 | CAISO DMM Q1–Q3 quarterly | CAISO 2025 Year in Review | Medium |
+| NYISO | $55.00 | $65.00 | 800 | Potomac Economics + EIA monthly | Est. proportional to 2024 | Medium |
+| ISO-NE | $55.00 | $65.00 | 600 | ISO Newswire monthly | Est. proportional to 2024 | Medium |
 
-**BRA 2025/26 verification:** The $269.92/MW-day clearing price is confirmed from S&P Global and PJM's official BRA report. This represents a 9× increase from the 2024/2025 BRA ($28.92/MW-day) and is contractually binding for the 2025/2026 delivery year.
+**Key locked-in prices:**
+- **PJM BRA 2025/26:** $269.92/MW-day (~$18/MWh capacity adder, 9× increase from $28.92). Confirmed from S&P Global and PJM official report. Contractually binding.
+- **MISO PRA 2025/26:** $217/MW-day annualized (~$9/MWh capacity adder, 10× increase). Summer peak $666.50/MW-day (22× increase). Structural capacity shortfall.

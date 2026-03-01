@@ -8,7 +8,7 @@ This mirrors the Zidar housing economics framing: rents vs. building permits acr
 
 ## Data Sources
 
-The chart supports **2023**, **2024**, and **2025 estimates** (PJM, MISO) via a year toggle. In ISO view, all three years are available; in state view, 2023 and 2024. All data is for calendar year **2024** by default unless otherwise noted.
+The chart supports **2023**, **2024**, and **2025 estimates** (all 7 ISOs) via a year toggle. In ISO view, all three years are available; in state view, 2023 and 2024. All data is for calendar year **2024** by default unless otherwise noted.
 
 ### Wholesale Electricity Prices ($/MWh)
 
@@ -249,23 +249,33 @@ Both 2023 and 2024 capacity data use **EIA-860M January 2026 vintage** as the si
 
 ### 2025 estimates (ISO view)
 
-Two ISOs have locked-in capacity market results that dramatically change their all-in cost picture:
+All 7 ISOs have 2025 estimates. No annual SOM reports are published yet (expect May–Aug 2026). Two ISOs have locked-in capacity auction results; the remaining five use EIA STEO monthly data, ISO quarterly reports, and proportional estimates.
 
-**PJM:** The BRA 2025/26 cleared at $269.92/MW-day (~$18/MWh capacity adder), which is contractually binding. Other components are estimated:
-- Wholesale: ~$34/MWh (similar to 2024)
-- All-in: ~$52/MWh (wholesale + $18/MWh capacity)
-- Capacity additions: ~4,000 MW (queue still clogged)
-- Peak demand: ~155 GW (trending up from 152.6)
+**Prices:**
 
-**MISO:** The PRA 2025/26 cleared at $217.50/MW-day annualized (~$9/MWh capacity adder, a 10× increase from 2024). Summer peak reached $666.50/MW-day (22× increase). Other components are estimated:
-- Wholesale: ~$31/MWh (similar to 2024)
-- All-in: ~$40/MWh (wholesale + $9/MWh capacity)
-- Capacity additions: ~7,000 MW (similar to 2024)
-- Peak demand: ~123 GW
+| ISO | Wholesale | All-In | Source |
+|-----|-----------|--------|--------|
+| ERCOT | $37.57 | $37.57 | EIA STEO monthly (ERCOT North Hub DA, 12-month avg) |
+| SPP | $37.91 | $39.00 | EIA STEO monthly (SPP South Hub DA, 12-month avg) |
+| MISO | $31.00 | $40.00 | Est. ~$31 wholesale + PRA 2025/26 at $217/MW-day annualized (~$9/MWh, 10× increase) |
+| PJM | $34.00 | $52.00 | Est. ~$34 wholesale + BRA 2025/26 at $269.92/MW-day (~$18/MWh, 9× increase) |
+| CAISO | $35.00 | $40.00 | CAISO DMM Q1–Q3 quarterly reports (lower than 2024 due to solar oversupply) |
+| NYISO | $55.00 | $65.00 | Potomac Economics quarterly + EIA monthly (gas-driven winter spikes) |
+| ISO-NE | $55.00 | $65.00 | ISO Newswire monthly (winter spikes $130+/MWh pulled annual average up) |
 
-MISO's capacity shortfall is structural — retirements outpacing additions in key zones, exacerbated by growing data center and electrification demand.
+**Capacity:**
 
-Both 2025 estimate points are rendered with dashed outlines and reduced opacity to distinguish them from observed data.
+| ISO | MW | Source |
+|-----|-----|--------|
+| ERCOT | 11,000 | Modo Energy 2025 annual report (5,200 battery + 4,500 solar + wind/gas) |
+| MISO | 7,000 | Est. similar to 2024 |
+| CAISO | 5,713 | CAISO 2025 Year in Review (includes 4,260 MW battery) |
+| PJM | 4,000 | Est. similar to 2024 (queue still clogged) |
+| SPP | 1,200 | Est. proportional to 2024 |
+| NYISO | 800 | Est. proportional to 2024 |
+| ISO-NE | 600 | Est. proportional to 2024 |
+
+All 2025 estimate points are rendered with dashed outlines and reduced opacity to distinguish them from observed data.
 
 ### State multi-year data (2023 & 2024)
 

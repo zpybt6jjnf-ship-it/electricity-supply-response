@@ -3,7 +3,7 @@ import type { ISODataPoint, XAxisMetric, PriceMetric, CapacityWeighting, Granula
 import type { YearKey } from "../App";
 import { capacityPerGwPeak, capacityPerGwPeakElcc } from "../lib/types";
 import { FONT } from "../lib/theme";
-import { GROUP_FILLS, SITING_FILLS } from "../lib/colors";
+import { GROUP_FILLS } from "../lib/colors";
 
 interface Props {
   data: ISODataPoint;
@@ -50,9 +50,7 @@ export function ScatterTooltip({ data, xMetric, priceMetric, weighting, granular
           fontWeight: 700,
           fontSize: 14,
           marginBottom: 2,
-          color: isStateView
-            ? (SITING_FILLS[data.siting_regime || ""] || GROUP_FILLS[data.color_group])
-            : GROUP_FILLS[data.color_group],
+          color: GROUP_FILLS[data.color_group],
         }}
       >
         {displayName}
@@ -60,11 +58,6 @@ export function ScatterTooltip({ data, xMetric, priceMetric, weighting, granular
           {yearLabel}
         </span>
       </div>
-      {isStateView && data.siting_regime && (
-        <div style={{ fontSize: 11, color: "#777", marginBottom: 2 }}>
-          {data.siting_regime}
-        </div>
-      )}
       {isEst && (
         <div style={{ color: "#e65100", fontSize: 10.5, fontStyle: "italic", marginBottom: 4 }}>
           Estimated — {data.confidence ?? "projected values"}
