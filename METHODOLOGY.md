@@ -123,6 +123,8 @@ Nameplate MW overstates variable resources for reliability purposes. 1 MW of sol
 - **CAISO**: Battery at 85–90% (4-hour duration); solar at ~30% (high penetration saturation).
 - **ERCOT**: Solar ~30%, battery ~85%, gas 95% — close to generic factors.
 
+**Why not use published ISO-specific ELCC rates for every technology?** Each ISO uses a fundamentally different accreditation methodology — PJM and NYISO use *marginal* ELCC (the reliability value of the next MW added), MISO and ERCOT publish *average* ELCC (fleet-wide contribution), and CAISO has moved entirely to hourly Slice-of-Day profiles with no single annual percentage. Published values for solar range from 11% (PJM marginal) to 71% (ERCOT CDR) — but these are measuring different things and are not directly comparable. Using all of them in the same chart would create an apples-to-oranges comparison that implies cross-ISO comparability that doesn't exist. The generic national-average factors with selective ISO overrides are an intentional simplification that maintains consistency across ISOs at the cost of per-ISO precision.
+
 ELCC varies significantly by ISO, season, and penetration level. These are **estimates** — actual ELCC values vary by vintage, location, and portfolio effects (saturation reduces marginal ELCC).
 
 | ISO | Nameplate MW | ELCC MW | MW/GW (Nameplate) | MW/GW (ELCC) |

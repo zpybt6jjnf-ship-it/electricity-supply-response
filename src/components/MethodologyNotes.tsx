@@ -84,8 +84,13 @@ export function MethodologyNotes({ granularity }: Props) {
                   within the state.
                 </li>
                 <li style={LI_STYLE}>
-                  ELCC weighting uses state-level technology mix from EIA-860M. Approximate ELCC factors:
-                  solar 35%, wind 25%, battery 90%, gas/nuclear ~100%.
+                  ELCC weighting uses state-level technology mix from EIA-860M with approximate national-average
+                  factors: solar 30–35%, wind 15–25%, battery 85–90%, gas 95%. Three ISO-specific overrides
+                  are applied: MISO solar 50% (published seasonal default), SPP wind 22.5%, CAISO battery 87.5%.
+                  These are <em>average</em> ELCC estimates, not marginal. Published ISO accreditation values
+                  differ substantially — e.g., PJM marginal ELCC for solar is 11% vs. ERCOT CDR at 71% — but
+                  these measure different things (next-MW reliability contribution vs. fleet-average peak credit)
+                  and are not directly comparable across ISOs.
                 </li>
               </ul>
             </>
